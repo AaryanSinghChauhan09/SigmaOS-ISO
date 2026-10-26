@@ -1,0 +1,29 @@
+[package]
+name = "sigmaos-iso"
+version = "0.1.0"
+edition = "2021"
+authors = ["SigmaOS Project"]
+description = "ISO image builder with multi-architecture support, bootloader integration, live session creation"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/AaryanSinghChauhan09/SigmaOS-iso"
+readme = "README.md"
+keywords = ["iso", "installer", "bootloader", "sigmaos"]
+categories = ["os", "command-line-utilities"]
+
+[dependencies]
+# Core dependencies
+sigmaos-kernel = { version = "0.1", path = "../SigmaOS-kernel" }
+
+[features]
+default = ["std"]
+std = []
+no_std = []
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
