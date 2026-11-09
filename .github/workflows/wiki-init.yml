@@ -1,0 +1,28 @@
+name: wiki-init
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [`.github/workflows/wiki-init.yml`]
+permissions:
+  contents: write
+jobs:
+  init-wiki:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Init wiki repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          cd /tmp
+          rm -rf wiki
+          git init -q -b master wiki
+          cd wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          printf '# SigmaOS-iso\n\nComponent wiki for SigmaOS-iso.\n' > Home.md
+          git add Home.md
+          git commit -qm "wiki: initial Home"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.wiki.git"
+          git push -u origin master
