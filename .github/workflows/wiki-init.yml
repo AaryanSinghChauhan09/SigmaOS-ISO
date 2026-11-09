@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [`.github/workflows/wiki-init.yml`]
+    paths: [".github/workflows/wiki-init.yml"]
 permissions:
   contents: write
 jobs:
