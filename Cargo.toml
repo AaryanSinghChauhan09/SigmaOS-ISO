@@ -12,7 +12,7 @@ categories = ["os", "command-line-utilities"]
 
 [dependencies]
 # Core dependencies
-sigmaos-kernel = { version = "0.1", path = "../SigmaOS-kernel" }
+sigmaos_kernel = { version = "0.1", path = "../SigmaOS-kernel" }
 
 [features]
 default = ["std"]

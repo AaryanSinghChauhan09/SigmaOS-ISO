@@ -7,7 +7,11 @@
 //! - LAYERED DESIGN: Separation of mechanism and policy
 //! - KISS: Simple, focused implementation
 
+extern crate alloc;
+
+#[path = "../iso/mod.rs"]
 pub mod iso;
+#[path = "../installer/mod.rs"]
 pub mod installer;
 
 // Re-export key interfaces
