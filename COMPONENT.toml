@@ -1,6 +1,6 @@
 [component]
 name = "SigmaOS-ISO"
-description = "SigmaOS subsystem component for ISO"
+description = "Build the SigmaOS live ISO from a manifest"
 version = "0.1.0"
 tier = 0
 
