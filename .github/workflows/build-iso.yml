@@ -111,7 +111,8 @@ jobs:
       run: |
         set -euo pipefail
         sudo apt-get update -qq
-        sudo apt-get install -y -qq xorriso mtools sbctl >/dev/null
+        # sbsigntool provides sbsign/sbverify; sbctl is not packaged on Ubuntu.
+        sudo apt-get install -y -qq xorriso mtools sbsigntool >/dev/null
         ISO=$(ls out/*.iso | head -1)
         SB_DIR=secureboot-keys
         if [[ -n "${SIGMAOS_SB_KEY:-}" && -n "${SIGMAOS_SB_CRT:-}" ]]; then
