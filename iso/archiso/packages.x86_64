@@ -69,7 +69,8 @@ xdg-desktop-portal-gtk
 polkit-gnome
 brightnessctl
 playerctl
-wallust
+# wallust intentionally excluded: AUR-only, not in official Arch repos
+# (scripts guard with `command -v wallust`; install from AUR post-setup)
 
 # ── Audio & Media ─────────────────────────────────────────────────────────────
 pipewire
