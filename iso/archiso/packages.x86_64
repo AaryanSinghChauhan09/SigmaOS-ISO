@@ -30,8 +30,11 @@ e2fsprogs
 dosfstools
 xfsprogs
 ntfs-3g
+exfatprogs
 parted
 smartmontools
+# snapper/snap-pac intentionally excluded: SigmaOS ships its own
+# sigmaos-snapshot + pacman hooks for btrfs snapshots (no duplicate subsystems)
 
 # ── Networking & Connectivity ─────────────────────────────────────────────────
 networkmanager
@@ -42,11 +45,14 @@ wpa_supplicant
 iwd
 bluez
 bluez-utils
+blueman
 curl
 wget
 git
 openssh
 rsync
+xdg-utils
+xdg-user-dirs
 
 # ── Wayland, Compositor & Graphics Stack ──────────────────────────────────────
 hyprland
@@ -66,9 +72,21 @@ wl-clipboard
 cliphist
 xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
+xdg-desktop-portal-wlr
+xorg-server-xwayland
 polkit-gnome
 brightnessctl
 playerctl
+wlogout
+wtype
+kanshi
+wlr-randr
+hyprsunset
+hyprshade
+hyprpicker
+wayvnc
+wf-recorder
+kooha
 # wallust intentionally excluded: AUR-only, not in official Arch repos
 # (scripts guard with `command -v wallust`; install from AUR post-setup)
 
@@ -82,6 +100,9 @@ wireplumber
 pavucontrol
 mpv
 imv
+mesa-utils
+vdpau-info
+libva-utils
 
 # ── Fonts & Typography ────────────────────────────────────────────────────────
 ttf-jetbrains-mono
@@ -90,6 +111,14 @@ noto-fonts
 noto-fonts-cjk
 noto-fonts-emoji
 ttf-font-awesome
+papirus-icon-theme
+adw-gtk-theme
+gnome-themes-extra
+qt5ct
+qt6ct
+kvantum
+nwg-look
+sassuello
 
 # ── File Manager & Archives ───────────────────────────────────────────────────
 thunar
@@ -104,6 +133,10 @@ gzip
 bzip2
 xz
 zstd
+gvfs
+gvfs-mtp
+gvfs-smb
+gvfs-afc
 
 # ── System Monitoring & CLI Utilities ─────────────────────────────────────────
 btop
@@ -115,6 +148,15 @@ ripgrep
 fd
 bat
 jq
+eza
+zoxide
+duf
+procs
+dust
+hyperfine
+gping
+doggo
+sd
 
 # ── Development & Shells ──────────────────────────────────────────────────────
 bash
@@ -126,6 +168,23 @@ lazygit
 rust
 python
 python-pip
+
+# ── Session, Power & Login ────────────────────────────────────────────────────
+accountsservice
+upower
+power-profiles-daemon
+# greetd/tuigreet intentionally excluded: SigmaOS uses autologin tty1 → Hyprland
+
+# ── Gaming ────────────────────────────────────────────────────────────────────
+gamemode
+mangohud
+mesa
+vulkan-icd-loader
+lib32-mesa
+lib32-vulkan-icd-loader
+
+# ── AUR Helper ────────────────────────────────────────────────────────────────
+yay
 
 # ── Everyday Applications ─────────────────────────────────────────────────────
 chromium
