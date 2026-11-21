@@ -31,8 +31,10 @@ verify_initramfs() {
   cfg="$(lsinitcpio -c "$img" 2>/dev/null)" || { echo "customize: cannot read config of $img" >&2; return 1; }
   echo "$cfg" | grep -q 'archiso_loop_mnt' || {
     echo "customize: $img missing archiso_loop_mnt hook" >&2; return 1; }
-  echo "$cfg" | grep -q 'archiso_pxe_nfs' || {
-    echo "customize: $img missing archiso pxe hooks" >&2; return 1; }
+  echo "$cfg" | grep -qw 'archiso' || {
+    echo "customize: $img missing archiso hook" >&2; return 1; }
+  # archiso_pxe_nfs intentionally absent: PXE/NFS netboot hooks were removed
+  # (no ipconfig/nbd/nfs binaries shipped). Live media boots from local media.
   listing="$(lsinitcpio -l "$img" 2>/dev/null)" || { echo "customize: cannot list $img" >&2; return 1; }
   local mod
   for mod in sr_mod ata_piix isofs cdrom; do
