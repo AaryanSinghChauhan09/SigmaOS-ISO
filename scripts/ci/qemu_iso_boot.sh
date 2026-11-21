@@ -63,7 +63,11 @@ QEMU_CMD=(
     -cdrom "$ISO"
     -kernel "$WORK/vmlinuz-linux"
     -initrd "$WORK/initramfs-linux.img"
-    -append "archisobasedir=sigmaos console=ttyS0"
+    # archisodevice/img_dev tell archiso which block device holds the live
+    # media — the bootloader passes these on real boots, but a direct
+    # -kernel/-initrd boot has no bootloader, so they must be explicit.
+    # QEMU's -cdrom lands on /dev/sr0 for the default pc machine.
+    -append "archisobasedir=sigmaos archisodevice=${SIGMAOS_QEMU_CDROM_DEV:-/dev/sr0} img_dev=${SIGMAOS_QEMU_CDROM_DEV:-/dev/sr0} console=ttyS0"
     -no-reboot
 )
 
