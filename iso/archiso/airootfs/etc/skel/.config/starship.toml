@@ -1,6 +1,6 @@
 # SigmaOS starship prompt — fast, informative, SigmaOS-branded.
 format = """
-[\$all]$directory$git_branch$git_status$cmd_duration$line_break$character"""
+$directory$git_branch$git_status$cmd_duration$line_break$character"""
 
 [directory]
 truncation_length = 3
