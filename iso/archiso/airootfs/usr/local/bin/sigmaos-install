@@ -130,6 +130,7 @@ mount -o noatime,compress=zstd:3,subvol=@var_log   "$P_ROOT" "$MNT/var/log"
 mount "$P_EFI" "$MNT/boot"
 
 echo "[5/9] Writing fstab..."
+mkdir -p "$MNT/etc"
 cat > "$MNT/etc/fstab" <<'EOF'
 LABEL=SIGMAOS_ROOT  /            btrfs  rw,noatime,compress=zstd:3,subvol=@          0 0
 LABEL=SIGMAOS_ROOT  /home        btrfs  rw,noatime,compress=zstd:3,subvol=@home      0 0
