@@ -101,6 +101,16 @@ sgdisk -n 2:0:0      -t 2:8300 -c 2:SIGMAOS_ROOT "$TARGET_DEV"
 [[ "$TARGET_DEV" =~ [0-9]$ ]] && { P_EFI="${TARGET_DEV}p1"; P_ROOT="${TARGET_DEV}p2"; } \
                              || { P_EFI="${TARGET_DEV}1";  P_ROOT="${TARGET_DEV}2"; }
 
+# Force the kernel to re-read the partition table — sgdisk's BLKRRPART can
+# silently fail on loop devices and busy disks, leaving p1/p2 nodes absent.
+partprobe "$TARGET_DEV" 2>/dev/null || blockdev --rereadpt "$TARGET_DEV" 2>/dev/null || true
+udevadm settle --timeout=10 2>/dev/null || true
+for _ in $(seq 1 50); do
+    [[ -b "$P_EFI" && -b "$P_ROOT" ]] && break
+    sleep 0.2
+done
+[[ -b "$P_EFI" && -b "$P_ROOT" ]] || { echo "FATAL: partition nodes $P_EFI/$P_ROOT did not appear." >&2; exit 1; }
+
 echo "[2/9] Formatting partitions..."
 mkfs.vfat -F32 -n SIGMAOS_EFI "$P_EFI"
 mkfs.btrfs -f -L SIGMAOS_ROOT "$P_ROOT"
