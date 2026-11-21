@@ -50,6 +50,12 @@ verify_initramfs /boot/initramfs-linux.img || exit 1
 verify_initramfs /boot/initramfs-linux-fallback.img || exit 1
 echo "customize: initramfs verification passed"
 
+# Guarantee exec bits on shipped scripts — files copied into airootfs by
+# some tooling paths have been observed losing +x, which makes the live
+# installer "command not found".
+chmod 0755 /usr/local/bin/sigmaos-* /usr/local/bin/sigma-aur \
+          /etc/skel/.config/hypr/autostart.sh 2>/dev/null || true
+
 # Live session user: the shipped /etc/passwd defines liveuser, but nothing
 # creates its home — without it, tty1 autologin lands in a bare shell and
 # .bash_profile (which launches Hyprland) never runs. Populate /home/liveuser
