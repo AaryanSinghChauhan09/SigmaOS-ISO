@@ -61,7 +61,7 @@ if [[ $DRY_RUN -eq 1 ]]; then
 [PLAN] FS:          btrfs compress=zstd:3,noatime
 [PLAN] Bootloader:  GRUB (UEFI)
 [PLAN] Desktop:     Hyprland + waybar + foot + thunar + pipewire
-[PLAN] Packages:    ~60 curated (see pacstrap below)
+[PLAN] Packages:    desktop-parity set (see pacstrap below)
 To execute: sigmaos-install --destructive --confirm-disk $TARGET_DEV
 EOF
     exit 0
