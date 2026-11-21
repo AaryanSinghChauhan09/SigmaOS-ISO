@@ -21,4 +21,11 @@ file_permissions=(
   ["/usr/local/bin/choose-mirror"]="0:0:755"
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
+  ["/usr/local/bin/sigma-aur"]="0:0:755"
+  ["/usr/local/bin/sigmaos-install"]="0:0:755"
+  ["/usr/local/bin/sigmaos-provision-owner"]="0:0:755"
+  ["/usr/local/bin/sigmaos-secureboot"]="0:0:755"
+  ["/usr/local/bin/sigmaos-snapshot"]="0:0:755"
+  ["/usr/local/bin/sigmaos-update"]="0:0:755"
+  ["/etc/skel/.config/hypr/autostart.sh"]="0:0:755"
 )
