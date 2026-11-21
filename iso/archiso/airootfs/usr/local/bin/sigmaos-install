@@ -75,16 +75,16 @@ systemd systemd-sysvcompat sudo btrfs-progs e2fsprogs dosfstools xfsprogs ntfs-3
 exfatprogs parted smartmontools efibootmgr grub os-prober gptfdisk \
 pacman-contrib arch-install-scripts sbctl \
 hyprland hyprpaper hypridle hyprlock waybar foot rofi-wayland mako dunst \
-grim slurp swappy wl-clipboard cliphist wtype wlogout \
+grim slurp swappy wl-clipboard cliphist wtype \
 xdg-desktop-portal-hyprland xdg-desktop-portal-gtk xdg-desktop-portal-wlr \
-xorg-server-xwayland polkit-gnome brightnessctl playerctl \
-kanshi wlr-randr hyprsunset hyprshade hyprpicker wayvnc wf-recorder kooha \
+xorg-xwayland polkit-gnome brightnessctl playerctl \
+kanshi wlr-randr hyprsunset hyprpicker wayvnc wf-recorder kooha \
 pipewire pipewire-pulse pipewire-alsa pipewire-jack wireplumber pavucontrol \
-mpv imv mesa-utils vdpau-info libva-utils \
+mpv imv mesa-utils libva-utils \
 networkmanager network-manager-applet nm-connection-editor iwd bluez bluez-utils blueman \
 curl wget git openssh rsync xdg-utils xdg-user-dirs \
 noto-fonts ttf-jetbrains-mono ttf-font-awesome papirus-icon-theme adw-gtk-theme \
-gnome-themes-extra qt5ct qt6ct kvantum nwg-look sassuello \
+gnome-themes-extra qt5ct qt6ct kvantum nwg-look \
 thunar thunar-volman thunar-archive-plugin file-roller p7zip unzip zip tar gzip bzip2 xz zstd \
 gvfs gvfs-mtp gvfs-smb gvfs-afc \
 neovim bash zsh starship tmux lazygit \
@@ -92,7 +92,7 @@ btop htop fastfetch tree fzf ripgrep fd bat jq eza zoxide duf procs dust \
 hyperfine gping doggo sd python python-pip \
 accountsservice upower power-profiles-daemon \
 gamemode mangohud mesa vulkan-icd-loader lib32-mesa lib32-vulkan-icd-loader \
-yay chromium hyprshot tpm2-tools"
+chromium hyprshot tpm2-tools"
 
 echo "[1/9] Partitioning $TARGET_DEV (GPT)..."
 sgdisk --zap-all "$TARGET_DEV"
