@@ -74,7 +74,7 @@ PKGS="base base-devel linux linux-firmware linux-headers intel-ucode amd-ucode \
 systemd systemd-sysvcompat sudo btrfs-progs e2fsprogs dosfstools xfsprogs ntfs-3g \
 exfatprogs parted smartmontools efibootmgr grub os-prober gptfdisk \
 pacman-contrib arch-install-scripts sbctl \
-hyprland hyprpaper hypridle hyprlock waybar foot rofi-wayland mako dunst \
+hyprland hyprpaper hypridle hyprlock waybar foot rofi-wayland dunst \
 grim slurp swappy wl-clipboard cliphist wtype \
 xdg-desktop-portal-hyprland xdg-desktop-portal-gtk xdg-desktop-portal-wlr \
 xorg-xwayland polkit-gnome brightnessctl playerctl \
