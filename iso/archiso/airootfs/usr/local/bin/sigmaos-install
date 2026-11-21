@@ -175,9 +175,13 @@ arch-chroot "$MNT" bash -c '
     # Ensure the kernel + initramfs exist, then build all presets.
     [[ -e /boot/vmlinuz-linux ]] || cp /usr/lib/modules/*/vmlinuz /boot/vmlinuz-linux
     mkinitcpio -P
-    # Install GRUB for UEFI into the ESP mounted at /boot.
+    # Install GRUB for UEFI into the ESP mounted at /boot. Some VMs and
+    # containers lack efivarfs, so fall back to --no-nvram (files land on
+    # the ESP; firmware picks them up via the removable path or manual entry).
     grub-install --target=x86_64-efi --efi-directory=/boot \
-        --bootloader-id=SigmaOS --recheck
+        --bootloader-id=SigmaOS --recheck || \
+    grub-install --target=x86_64-efi --efi-directory=/boot \
+        --bootloader-id=SigmaOS --recheck --no-nvram
     grub-mkconfig -o /boot/grub/grub.cfg
     systemctl enable NetworkManager bluetoothd fstrim.timer 2>/dev/null || true
 '
