@@ -5,10 +5,3 @@ version = 4
 [[package]]
 name = "sigmaos-iso"
 version = "0.1.0"
-dependencies = [
- "sigmaos_kernel",
-]
-
-[[package]]
-name = "sigmaos_kernel"
-version = "0.1.0"
