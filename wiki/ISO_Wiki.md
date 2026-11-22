@@ -1,18 +1,18 @@
-# SigmaOS-SigmaOS-ISO Component Wiki
+# SigmaOS-ISO Component Wiki
 
 ## Overview
-SigmaOS-SigmaOS-ISO provides Build the SigmaOS live ISO from a manifest for the SigmaOS operating system. It demonstrates the subsystem and integration within the SigmaOS ecosystem, following the principles of clear abstraction and deterministic initialization.
+SigmaOS-ISO provides component for the SigmaOS operating system. It demonstrates the subsystem and integration within the SigmaOS ecosystem, following the principles of clear abstraction and deterministic initialization.
 
 ## Principles
-- Single Responsibility
-- SigmaOS-ISO Abstraction
-- Fail-Fast on SigmaOS-ISO Initialization Errors
-- Deterministic SigmaOS-ISO Setup
-- Clear Abstraction Over SigmaOS-ISO APIs
-- Composition over Inheritance for SigmaOS-ISO extensions
+- **Single Responsibility**: Each component has a single well-defined purpose
+- **SigmaOS-ISO Abstraction**: Clear abstraction over the component's APIs and functionality
+- **Fail-Fast on SigmaOS-ISO Initialization Errors**: Fail-fast principle for initialization errors
+- **Deterministic SigmaOS-ISO Setup**: Deterministic initialization and configuration
+- **Clear Abstraction Over SigmaOS-ISO APIs**: Well-defined, clear APIs
+- **Composition over Inheritance for SigmaOS-ISO extensions**: Use composition patterns for extensions
 
 ## Architecture
-SigmaOS-SigmaOS-ISO follows a SigmaOS-ISO pattern:
+SigmaOS-ISO follows a SigmaOS-ISO pattern:
 - **SigmaOS-ISO Core**: Provides SigmaOS-ISO support, SigmaOS-ISO management, and SigmaOS-ISO tracking
 - **Management**: Supports SigmaOS-ISO management, SigmaOS-ISO configuration, and SigmaOS-ISO lifecycle
 - **Tracking**: Supports SigmaOS-ISO status, SigmaOS-ISO tracking, and SigmaOS-ISO lifecycle
@@ -20,10 +20,10 @@ SigmaOS-SigmaOS-ISO follows a SigmaOS-ISO pattern:
 
 ## API
 The component provides the following public APIs:
--  - Manage a SigmaOS-ISO by given configuration
--  - Register a SigmaOS-ISO by given name
--  - Get SigmaOS-ISO status and SigmaOS-ISO availability
--  - Track SigmaOS-ISO management and SigmaOS-ISO tracking
+- Manage a SigmaOS-ISO by given configuration
+- Register a SigmaOS-ISO by given name
+- Get SigmaOS-ISO status and SigmaOS-ISO availability
+- Track SigmaOS-ISO management and SigmaOS-ISO tracking
 - Error types for SigmaOS-ISO failure scenarios or unsupported SigmaOS-ISO types
 
 ## Test Structure (Arrange-Act-ASSERT)
@@ -32,11 +32,8 @@ All tests follow the AAA pattern:
 2. **Act**: Execute the code under test (SigmaOS-ISO init, SigmaOS-ISO management)
 3. **Assert**: Verify the expected SigmaOS-ISO results
 
-Example:
-
-
 ## Development
-- Follows Rust best practices with 
+- Follows best practices with clear abstraction boundaries
 - SigmaOS-ISO initialization is best-effort; gracefully degrades on unsupported configurations
 - Comprehensive error types for all SigmaOS-ISO failure scenarios
 - Unit tests provided for SigmaOS-ISO management and configuration
