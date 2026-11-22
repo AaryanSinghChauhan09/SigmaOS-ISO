@@ -13,5 +13,11 @@ export VISUAL="${VISUAL:-nvim}"
 export TERMINAL="${TERMINAL:-foot}"
 
 if [ -z "${SSH_TTY:-}" ] && [ -z "${WAYLAND_DISPLAY:-}" ] && [ "${XDG_VTNR:-}" = "1" ]; then
+    # Software-rendering fallbacks: lets Hyprland/Waybar run on VMs,
+    # remote desktops, and GPUs without working GL — Omarchy lacks this.
+    export WLR_RENDERER="${WLR_RENDERER:-pixman}"
+    export WLR_DRM_NO_ATOMIC="${WLR_DRM_NO_ATOMIC:-1}"
+    export LIBGL_ALWAYS_SOFTWARE="${LIBGL_ALWAYS_SOFTWARE:-1}"
+    export GALLIUM_DRIVER="${GALLIUM_DRIVER:-llvmpipe}"
     command -v Hyprland >/dev/null 2>&1 && Hyprland
 fi
