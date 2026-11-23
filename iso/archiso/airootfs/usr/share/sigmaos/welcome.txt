@@ -1,0 +1,27 @@
+Welcome to SigmaOS
+==================
+
+An Arch-based Linux desktop with a pre-configured Hyprland session.
+
+ESSENTIAL KEYS
+  SUPER+ENTER      terminal (foot)
+  SUPER+D          app launcher (rofi)
+  SUPER+SPACE      app launcher (alternate)
+  SUPER+E          file manager (Thunar)
+  SUPER+arrows     move focus
+  SUPER+SHIFT+arrows  move window
+  SUPER+1..0       switch workspace
+  SUPER+S          screenshot
+  SUPER+CTRL+L     lock screen
+  SUPER+M          exit desktop
+
+TOOLS
+  sigmaos-doctor   check system health (display, network, audio, disk)
+  sigmaos-theme    switch theme: list | catppuccin | tokyo-night | gruvbox | reset
+
+HELP
+  Website:  https://aaryansinghchauhan09.github.io/Sigma/download.html
+  Docs:     https://aaryansinghchauhan09.github.io/Sigma/
+  Issues:   https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/issues
+
+Tip: press SUPER+D and type "doctor" for a system health check.

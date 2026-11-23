@@ -1,0 +1,6 @@
+#!/bin/bash
+# sigmaos-theme-picker — interactive theme chooser via rofi/dmenu.
+set -euo pipefail
+
+choice=$(sigmaos-theme list | tail -n +2 | rofi -dmenu -i -p "SigmaOS theme:" -mesg "Pick a theme, Enter to apply" 2>/dev/null || true)
+[ -n "$choice" ] && sigmaos-theme "$choice"

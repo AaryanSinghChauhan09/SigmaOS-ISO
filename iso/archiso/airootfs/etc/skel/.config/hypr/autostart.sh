@@ -24,3 +24,6 @@ fi &
 # Clipboard + notifications (best-effort)
 command -v wl-paste >/dev/null 2>&1 && wl-paste --type text --watch cliphist store >/dev/null 2>&1 &
 command -v dunst >/dev/null 2>&1 && dunst >/dev/null 2>&1 &
+
+# First-login welcome / cheatsheet (runs once per user)
+command -v sigmaos-welcome >/dev/null 2>&1 && sigmaos-welcome >/dev/null 2>&1 &

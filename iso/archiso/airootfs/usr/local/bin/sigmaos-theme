@@ -1,0 +1,64 @@
+#!/bin/bash
+# sigmaos-theme — switch SigmaOS desktop theme safely.
+# Usage: sigmaos-theme list | sigmaos-theme <name> | sigmaos-theme reset
+# Backs up existing config before applying. Restarts waybar after switch.
+
+set -euo pipefail
+
+THEMES_DIR=/usr/share/sigmaos/themes
+HYPR_CONF="$HOME/.config/hypr/hyprland.conf"
+WAYBAR_CSS="$HOME/.config/waybar/style.css"
+BACKUP_DIR="$HOME/.config/sigmaos-backups/$(date +%Y%m%d-%H%M%S)"
+
+die() { echo "sigmaos-theme: $*" >&2; exit 1; }
+
+list_themes() {
+  echo "Available themes:"
+  for d in "$THEMES_DIR"/*/; do
+    [ -d "$d" ] && basename "$d"
+  done
+}
+
+backup() {
+  mkdir -p "$BACKUP_DIR"
+  [ -f "$HYPR_CONF" ] && cp -a "$HYPR_CONF" "$BACKUP_DIR/hyprland.conf"
+  [ -f "$WAYBAR_CSS" ] && cp -a "$WAYBAR_CSS" "$BACKUP_DIR/style.css"
+  echo "Backup saved to $BACKUP_DIR"
+}
+
+apply() {
+  local name="$1"
+  [ -d "$THEMES_DIR/$name" ] || die "unknown theme '$name' (try: sigmaos-theme list)"
+  backup
+  mkdir -p "$HOME/.config/hypr" "$HOME/.config/waybar"
+  cp "$THEMES_DIR/$name/hyprland.conf" "$HYPR_CONF"
+  cp "$THEMES_DIR/$name/style.css" "$WAYBAR_CSS"
+  # Reload waybar if running; hyprland picks up colors on next reload
+  if pgrep -x waybar >/dev/null 2>&1; then
+    pkill -x waybar; sleep 0.5; waybar >/dev/null 2>&1 &
+  fi
+  if command -v hyprctl >/dev/null 2>&1; then
+    hyprctl reload >/dev/null 2>&1 || true
+  fi
+  echo "Theme '$name' applied. Restart apps to see full effect."
+}
+
+reset() {
+  # Restore most recent backup
+  local latest
+  latest=$(ls -1dt "$HOME/.config/sigmaos-backups"/*/ 2>/dev/null | head -1 || true)
+  [ -n "$latest" ] || die "no backups found"
+  cp -a "$latest/hyprland.conf" "$HYPR_CONF" 2>/dev/null || true
+  cp -a "$latest/style.css" "$WAYBAR_CSS" 2>/dev/null || true
+  [ -f "$HYPR_CONF" ] || cp /etc/skel/.config/hypr/hyprland.conf "$HYPR_CONF" 2>/dev/null || true
+  [ -f "$WAYBAR_CSS" ] || cp /etc/skel/.config/waybar/style.css "$WAYBAR_CSS" 2>/dev/null || true
+  pkill -x waybar 2>/dev/null; sleep 0.5; waybar >/dev/null 2>&1 &
+  echo "Config restored from $latest"
+}
+
+case "${1:-}" in
+  ""|list|-l|--list) list_themes ;;
+  reset|--reset) reset ;;
+  -h|--help) echo "Usage: sigmaos-theme list|<name>|reset" ;;
+  *) apply "$1" ;;
+esac

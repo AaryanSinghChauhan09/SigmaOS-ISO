@@ -1,0 +1,25 @@
+#!/bin/bash
+# sigmaos-welcome — show the SigmaOS welcome/cheatsheet once per user.
+# Safe to run any time; pass --force to show again.
+
+WELCOME_FILE=/usr/share/sigmaos/welcome.txt
+MARKER="$HOME/.local/state/sigmaos-welcome-seen"
+
+[ -f "$WELCOME_FILE" ] || exit 0
+
+if [ "${1:-}" != "--force" ] && [ -f "$MARKER" ]; then
+    exit 0
+fi
+
+mkdir -p "$(dirname "$MARKER")"
+touch "$MARKER"
+
+# Show as a desktop notification plus a readable terminal window.
+if command -v notify-send >/dev/null 2>&1; then
+    notify-send -u normal -i dialog-information "SigmaOS" \
+        "Welcome! Press SUPER+D and type 'welcome' or run: sigmaos-welcome --force" 2>/dev/null || true
+fi
+
+if [ -n "${WAYLAND_DISPLAY:-}" ] && command -v foot >/dev/null 2>&1; then
+    foot --title "SigmaOS Welcome" bash -c 'cat /usr/share/sigmaos/welcome.txt; echo; read -p "Press Enter to close..."' >/dev/null 2>&1 &
+fi
