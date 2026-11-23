@@ -66,6 +66,26 @@ for arg in "$@"; do
   esac
 done
 
+# ── Validate built artifact ───────────────────────────────────────────────────
+# Fail the build if the ISO is missing, empty, or unreadable — a file existing
+# is not proof of a bootable image.
+validate_iso_artifact() {
+  local iso="$1"
+  local size
+  size=$(stat -c %s "$iso" 2>/dev/null || echo 0)
+  if (( size < 104857600 )); then
+    err "ISO artifact suspiciously small (${size} bytes): $iso"
+    exit 1
+  fi
+  if command -v xorriso &>/dev/null; then
+    if ! xorriso -indev "$iso" -find / -maxdepth 0 >/dev/null 2>&1; then
+      err "ISO artifact is not a readable ISO9660 image: $iso"
+      exit 1
+    fi
+  fi
+  info "ISO artifact validated: $iso (${size} bytes)"
+}
+
 # ── Validate ISO profile ──────────────────────────────────────────────────────
 validate_profile() {
   local ok=1
@@ -207,6 +227,7 @@ build_docker() {
 
   if ls "$OUT_DIR"/*.iso &>/dev/null; then
     success "ISO built successfully: $OUT_DIR/$(ls "$OUT_DIR"/*.iso | head -1 | xargs basename)"
+    validate_iso_artifact "$OUT_DIR"/*.iso
   else
     err "Build completed but no ISO found in $OUT_DIR"
     exit 1
@@ -236,6 +257,7 @@ build_native() {
 
   if ls "$OUT_DIR"/*.iso &>/dev/null; then
     success "ISO built: $(ls "$OUT_DIR"/*.iso)"
+    validate_iso_artifact "$OUT_DIR"/*.iso
   else
     err "Build failed — no ISO in $OUT_DIR"
     exit 1
