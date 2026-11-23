@@ -69,4 +69,14 @@ if id liveuser >/dev/null 2>&1; then
 else
   echo "customize: WARNING liveuser not in passwd" >&2
 fi
+
+# Hyprland's built-in first-run welcome screen (hyprland-welcome, part of
+# hyprland-guiutils/hyprtoolkit) segfaults in libhyprtoolkit on VMs and
+# software-rendered sessions, leaving a dead spinner over a black screen —
+# the live desktop appears broken. Removing the helper makes Hyprland log
+# "[welcome] skipping, no welcome app" and start the session normally.
+if [ -f /usr/bin/hyprland-welcome ]; then
+  rm -f /usr/bin/hyprland-welcome
+  echo "customize: removed hyprland-welcome (crashes in libhyprtoolkit)"
+fi
 ls -l /boot/
