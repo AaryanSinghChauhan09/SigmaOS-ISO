@@ -150,7 +150,7 @@ while time.time() < deadline:
         state = "pass"
         pass_since = time.time()
     elif state == "pass":
-        prompted = re.search(r"[\$#%]\s*(?:\x1b\[[0-9;]*m)*\s*$", text)
+        prompted = re.search(r"[\$#%❯>]\s*(?:\x1b\[[0-9;]*m)*\s*$", text)
         if prompted or (pass_since and time.time() - pass_since > 90):
             s.sendall(b"sigmaos-install --dry-run /dev/vda\n")
             state = "install"
