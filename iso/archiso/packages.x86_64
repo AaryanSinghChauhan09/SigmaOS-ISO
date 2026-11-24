@@ -58,6 +58,7 @@ openssh
 rsync
 xdg-utils
 xdg-user-dirs
+reflector
 
 # ── Wayland, Compositor & Graphics Stack ──────────────────────────────────────
 hyprland
