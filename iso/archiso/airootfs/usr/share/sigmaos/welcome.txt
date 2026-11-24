@@ -12,6 +12,7 @@ Security:
   • Kernel hardening via sysctl (ASLR, ptrace restrictions, network hardening)
   • Auditd pre-installed for security event logging
   • Secure Boot signing tools included (sbctl, tpm2-tools)
+  • Automatic security updates via systemd timer (Arch/Omarchy: manual only)
 
 UX/VM Experience:
   • Software-rendering fallbacks enabled (pixman, llvmpipe) — works in VMs
@@ -22,6 +23,11 @@ Desktop:
   • Hyprland + Waybar + Quickshell pre-configured with modern defaults
   • Better theme system (SigmaOS Theme Registry) with dynamic switching
   • Integrated installer (sigmaos-install) with BTRFS snapshots support
+
+System Recovery:
+  • Automatic BTRFS snapshots before/after pacman transactions
+  • Easy rollback via sigmaos-snapshot rollback <snapshot>
+  • Arch/Omarchy don't have automatic snapshot hooks by default
 
 Shortcuts (Hyprland)
 ================================================================================

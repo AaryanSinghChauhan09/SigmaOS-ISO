@@ -1,0 +1,14 @@
+[Unit]
+Description=SigmaOS Automatic Security Updates
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/sigmaos-update --security-only
+Nice=19
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+
+[Install]
+WantedBy=multi-user.target

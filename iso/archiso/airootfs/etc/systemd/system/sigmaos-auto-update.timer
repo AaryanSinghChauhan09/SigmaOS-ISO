@@ -1,0 +1,11 @@
+[Unit]
+Description=SigmaOS Automatic Security Updates Timer
+Documentation=https://github.com/AaryanSinghChauhan09/SigmaOS
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=2h
+
+[Install]
+WantedBy=timers.target
