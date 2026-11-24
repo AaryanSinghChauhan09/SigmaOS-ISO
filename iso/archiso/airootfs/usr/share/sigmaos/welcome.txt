@@ -1,54 +1,102 @@
 SigmaOS — Sovereign Linux Desktop
 ================================================================================
 
-Welcome to SigmaOS, a modular, security-hardened Linux distribution.
+Welcome to SigmaOS, a modular, security-hardened Linux distribution built
+on Arch Linux with enhanced security, better UX, and system recovery.
+
+Getting Started
+================================================================================
+
+This is the live environment. To install SigmaOS to your disk:
+  1. Run: sudo sigmaos-install
+  2. Follow the prompts to partition, format, and install
+  3. Reboot into your new SigmaOS installation
+
+First Boot After Installation
+================================================================================
+
+After installation and first boot:
+  1. Configure your user: Settings → Users
+  2. Set up your preferred theme: sigmaos-theme-picker
+  3. Connect to Wi-Fi: NetworkManager applet in Waybar
+  4. Update the system: sigmaos-update
+  5. Check system health: sigmaos-doctor
 
 SigmaOS Features
 ================================================================================
 
-Security:
+Security (advantages over Arch/Omarchy):
   • AppArmor ENABLED by default with enforcement mode
   • Kernel hardening via sysctl (ASLR, ptrace restrictions, network hardening)
   • Auditd pre-installed for security event logging
   • Secure Boot signing tools included (sbctl, tpm2-tools)
-  • Automatic security updates via systemd timer
+  • Automatic security updates via systemd timer (daily with randomized delay)
 
 UX/VM Experience:
   • Software-rendering fallbacks enabled (pixman, llvmpipe) — works in VMs
     providing better Wayland rendering in virtual environments
   • Better Wayland support out of the box with full PipeWire stack
+  • Enhanced zsh with starship prompt, larger history, better completion
+  • Hyprland window rules pre-configured for common applications
 
 Desktop:
-  • Hyprland + Waybar + Quickshell pre-configured with modern defaults
-  • Better theme system (SigmaOS Theme Registry) with dynamic switching
+  • Hyprland + Waybar pre-configured with modern defaults
+  • SigmaOS UI kit for cross-framework theming
   • Integrated installer (sigmaos-install) with BTRFS snapshots support
+  • Consistent theme switching across applications
 
-System Recovery:
+System Recovery (advantages over Arch/Omarchy):
   • Automatic BTRFS snapshots before/after pacman transactions
   • Easy rollback via sigmaos-snapshot rollback <snapshot>
+  • BTRFS with zstd:3 compression enabled by default
+  • SSD detection with automatic TRIM support
 
 Shortcuts (Hyprland)
 ================================================================================
-  SUPER + Q        Close window
-  SUPER + D        Launcher (Rofi)
-  SUPER + Enter    Terminal (foot)
-  SUPER + Shift + Q  Kill window
-  SUPER + W        Toggle floating
-  SUPER + [1-9]    Switch workspace
-  SUPER + Shift + [1-9]  Move to workspace
-  SUPER + F        Toggle fullscreen
+  SUPER + Q             Close window
+  SUPER + D             Launcher (Rofi)
+  SUPER + Enter         Terminal (foot)
+  SUPER + Shift + Q     Kill window
+  SUPER + W             Toggle floating
+  SUPER + [1-9]         Switch workspace
+  SUPER + Shift + [1-9] Move to workspace
+  SUPER + F             Toggle fullscreen
+  SUPER + Shift + Space Cycle through windows
+  SUPER + E             Open file manager (Thunar)
+  SUPER + V             Toggle clipboard history
 
 Useful Commands
 ================================================================================
   sigmaos-doctor          Check system health
   sigmaos-theme-picker    Switch themes
   sigmaos-snapshot        Create BTRFS snapshot
+  sigmaos-snapshot list   List available snapshots
+  sigmaos-snapshot rollback <snapshot>  Rollback to snapshot
   sigmaos-update          System update
   aa-status               Check AppArmor status
   sudo sigmaos-install    Install SigmaOS to disk
+  reflector --save /etc/pacman.d/mirrorlist  Update mirrors
+
+Hardware Detection
+================================================================================
+
+SigmaOS automatically detects:
+  • SSDs — enables TRIM with ssd,discard=async mount options
+  • Network devices — Wi-Fi (iwd), Ethernet, Bluetooth
+  • Graphics — falls back to software rendering if needed
+
+Troubleshooting
+================================================================================
+  • Check logs: journalctl -xe
+  • Check AppArmor: aa-status
+  • Check system health: sigmaos-doctor
+  • Network issues: nmcli connection show
+  • Audio issues: pactl info
 
 Documentation & Community
 ================================================================================
-  https://github.com/AaryanSinghChauhan09/SigmaOS
+  GitHub: https://github.com/AaryanSinghChauhan09/SigmaOS
+  Wiki: https://github.com/AaryanSinghChauhan09/SigmaOS/wiki
+  Issues: https://github.com/AaryanSinghChauhan09/SigmaOS/issues
 
 Press Enter to close...
