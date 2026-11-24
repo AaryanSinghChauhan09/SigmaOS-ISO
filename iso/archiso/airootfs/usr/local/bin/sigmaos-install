@@ -140,7 +140,22 @@ LABEL=SIGMAOS_EFI   /boot        vfat   rw,relatime,fmask=0022,dmask=0022       
 EOF
 
 echo "[6/9] Installing system with pacstrap (desktop-parity package set)..."
-pacstrap "$MNT" $PKGS
+# pacman has no per-package mirror failover: one stalled mirror aborts the
+# whole transaction. Retry a few times, refreshing the package lists so a
+# different mirror may be picked on each attempt.
+for attempt in 1 2 3; do
+    if pacstrap "$MNT" $PKGS; then
+        break
+    fi
+    if [[ $attempt -eq 3 ]]; then
+        echo "Error: pacstrap failed after 3 attempts (network/mirror issue?)." >&2
+        echo "Try again with a better connection, or install manually via the Arch wiki." >&2
+        exit 1
+    fi
+    echo "[6/9] pacstrap attempt $attempt failed — retrying in 10s..."
+    sleep 10
+    pacman -Syy --noconfirm >/dev/null 2>&1 || true
+done
 
 # Strip the build-time IgnorePkg pin that would otherwise leak into the
 # installed system and block openssl updates.
