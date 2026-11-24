@@ -1,28 +1,106 @@
 # SigmaOS-ISO
 
-Build the SigmaOS live ISO from a manifest
+The bootable SigmaOS system: an Arch-based live ISO with a pre-configured
+Omarchy-inspired Hyprland desktop, plus the installer and release pipeline.
+This is the repository that produces the downloadable `.iso`.
 
-- **Category:** Utilities
-- **Engine:** iso_builder
-- **Language:** Rust
+SigmaOS is **not** a custom-kernel project — it ships the stock Arch Linux
+kernel and official Arch packages (`pacman`).
 
-## Build & Test
+## What you get
 
-```sh
-cargo build
-cargo test
+- Live Hyprland (Wayland) desktop, autologin as `liveuser`
+- Waybar status bar, Rofi launcher, foot terminal, hyprlock
+- 3 tested themes: catppuccin, tokyo-night, gruvbox (`sigmaos-theme`)
+- `sigmaos-doctor` — one-command health check (session, network, audio, disk, updates)
+- `sigmaos-welcome` — first-login cheatsheet
+- `sigmaos-install` — installer (dry-run by default; destructive steps are guarded)
+- Boots via BIOS (syslinux) **and** UEFI (systemd-boot)
+
+## Live session credentials
+
+- **user:** `liveuser` — **password:** `sigmaos`
+- `liveuser` is in `wheel`; `sudo` uses the same password.
+- `root` is locked in the live image. `sigmaos-install` prompts for new
+  credentials on install.
+
+## Download
+
+Releases: <https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/releases>
+
+The ISO is published as split parts (`*.part00`, `*.part01`, …) to stay under
+GitHub's 2 GiB asset limit. Reassemble and verify:
+
+```bash
+cat sigmaos-desktop-*.iso.part* > sigmaos-desktop.iso
+sha256sum -c sigmaos-desktop-*.iso.sha256   # or .parts.sha256 for the parts
 ```
 
-Part of the SigmaOS multi-repository component ecosystem.
+Site download page: <https://aaryansinghchauhan09.github.io/Sigma/download.html>
 
-## Live session
+## Requirements
 
-The live ISO autologins `liveuser` on tty1 into Hyprland. For manual
-login (serial console, TTY switch):
+- x86_64 CPU, 4 GiB RAM (8 GiB recommended), ~10 GiB free disk for install
+- UEFI or legacy BIOS boot
+- For VMs: QEMU/KVM or any mainstream hypervisor works
 
-- **user:** `liveuser`
-- **password:** `sigmaos`
+## Build
 
-`liveuser` is in `wheel` — `sudo` works with the same password. The `root`
-account is locked in the live image. These credentials apply to the live
-environment only; `sigmaos-install` prompts for new credentials on install.
+Requires Docker **or** an Arch Linux host with `archiso`.
+
+```bash
+# Validate the profile only (any host):
+scripts/build_archiso.sh --validate-only
+
+# Build via Docker (works on Ubuntu/Debian hosts):
+scripts/build_archiso.sh --docker
+
+# Build natively on Arch Linux:
+sudo scripts/build_archiso.sh --native
+```
+
+Output: `out/sigmaos-desktop-<date>-x86_64.iso`. The build fails if the ISO is
+missing, suspiciously small, or not a readable ISO9660 image.
+
+The ISO is produced by `mkarchiso` (archiso), which writes a hybrid
+MBR/GPT El Torito image with the EFI system partition appended as a GPT
+partition — the same mechanism official Arch ISOs use.
+
+## Verification
+
+```bash
+# Direct kernel/initramfs boot test (fast, bypasses firmware):
+bash scripts/ci/qemu_iso_boot.sh out/*.iso
+
+# Real firmware boot test — SeaBIOS + OVMF, requires kernel markers on
+# the serial console (boot entries include console=ttyS0):
+bash scripts/ci/qemu_firmware_boot.sh out/*.iso both
+```
+
+Both run in CI on every ISO build. A release is only published after these
+pass.
+
+Manual QEMU test:
+
+```bash
+qemu-system-x86_64 -m 4G -enable-kvm -cdrom out/*.iso
+# UEFI: add OVMF pflash drives and -boot d (see qemu_firmware_boot.sh)
+```
+
+## Repository layout
+
+- `iso/archiso/` — archiso profile (packages, bootloader entries, airootfs)
+- `iso_root/` — installer root filesystem bits
+- `scripts/` — build, signing, reassembly, CI helpers
+- `installer/` — `sigmaos-install` implementation
+
+## Support status
+
+- **Verified:** BIOS boot in QEMU, live Hyprland session, MVP tools present
+  in the shipped image.
+- **In verification:** UEFI boot — the current release's UEFI path is being
+  re-tested; do not rely on it until a release notes UEFI as verified.
+- **Experimental:** installer end-to-end install in VM, Secure Boot signing
+  (needs enrolled keys), snapshot/rollback features.
+
+Report issues: <https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/issues>
