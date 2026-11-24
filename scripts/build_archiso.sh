@@ -157,9 +157,10 @@ build_docker() {
 
   mkdir -p "$OUT_DIR" "$WORK_DIR" "$WORK_DIR/pacman-cache"
 
-  # archlinux:latest ships openssl 4.x which breaks libssl.so=3 consumers and
-  # the erofs-utils dep chain. Pin openssl 3.x + archiso-91 (pre-erofs) from
-  # the Arch archive so the build is reproducible on a fresh clone.
+  # archiso-91 is used instead of current archiso because current archiso
+  # requires erofs-utils; our profile is squashfs so mkarchiso never invokes
+  # erofs tools. erofs-utils is skipped via --assume-installed. No openssl
+  # pin is needed: repo packages are built against the container's openssl.
   ensure_pkg() {
     local file="$1" url="$2"
     [ -s "$WORK_DIR/$file" ] && return 0
@@ -168,8 +169,7 @@ build_docker() {
       || { err "Failed to download $file"; exit 1; }
   }
   ARCH_SNAP="https://archive.archlinux.org/repos/2025/11/20/extra/os/x86_64"
-  ensure_pkg "openssl-3.6.5-1-x86_64.pkg.tar.zst"  "$ARCH_SNAP/openssl-3.6.5-1-x86_64.pkg.tar.zst"
-  ensure_pkg "archiso-91-1-any.pkg.tar.zst"       "$ARCH_SNAP/archiso-91-1-any.pkg.tar.zst"
+  ensure_pkg "archiso-91-1-any.pkg.tar.zst" "$ARCH_SNAP/archiso-91-1-any.pkg.tar.zst"
 
   local abs_profile
   abs_profile="$(realpath "$PROFILE_DIR")"
@@ -197,13 +197,6 @@ build_docker() {
       set -euo pipefail
       echo '[docker] Installing archiso...'
       pacman -Sy --noconfirm
-      # Pin openssl 3.x: archlinux:latest ships openssl 4.x which breaks
-      # libssl.so=3-64 consumers (curl, pacman deps) needed by archiso.
-      if [ -f /work/openssl-3.6.5-1-x86_64.pkg.tar.zst ]; then
-        pacman -U --noconfirm /work/openssl-3.6.5-1-x86_64.pkg.tar.zst
-        grep -q '^IgnorePkg.*openssl' /etc/pacman.conf || echo 'IgnorePkg = openssl' >> /etc/pacman.conf
-      fi
-      # Current archiso requires erofs-utils -> openssl 4 (conflicts with pin).
       # Use archived archiso-91 and skip erofs-utils: our profile is squashfs,
       # so mkarchiso never invokes erofs tools.
       if [ -f /work/archiso-91-1-any.pkg.tar.zst ]; then
