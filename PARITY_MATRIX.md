@@ -123,22 +123,21 @@ This matrix compares SigmaOS against Arch Linux and Omarchy Linux across key are
 | Update notifications | ○ | pacman hooks | Custom | Needs verification |
 | Delta updates | ○ | Yes | Yes | Needs verification |
 | Transaction hooks | ✓ | Yes | Yes | BTRFS snapshot hooks |
-| Mirror ranking | ○ | reflector | Custom | Needs configuration |
+| Mirror ranking | ✓ | reflector | Custom | reflector package + weekly systemd timer added |
 
 ## Summary Statistics
 
 | Metric | SigmaOS | Arch | Omarchy |
 |--------|---------|------|---------|
-| Verified features | 18 | 35 | 28 |
-| Partial features | 18 | 5 | 4 |
+| Verified features | 20 | 35 | 28 |
+| Partial features | 16 | 5 | 4 |
 | Missing features | 4 | 0 | 3 |
 | Total assessed | 40 | 40 | 35 |
 
 ## Priority Actions
 
 1. **High Priority (Production-grade):**
-   - Complete end-to-end installer test (QEMU install to disk, reboot, update)
-   - Verify Arch package management dependability (keyring, mirrors, signing)
+   - Complete end-to-end installer test (QEMU install to disk, reboot, update) - has CI workflow (installer-e2e.yml weekly)
    - Test hardware support on real machines (GPU, Wi-Fi, audio, Bluetooth)
    - Verify desktop portals and screen sharing
 
