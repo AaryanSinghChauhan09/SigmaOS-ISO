@@ -37,6 +37,7 @@ file_permissions=(
   ["/usr/local/bin/sigmaos-welcome"]="0:0:755"
   ["/etc/skel/.config/hypr/autostart.sh"]="0:0:755"
   ["/etc/systemd/system/apparmor-enforce.service"]="0:0:644"
+  ["/etc/systemd/system/sysinit.target.wants/apparmor-enforce.service"]="0:0:777"
   ["/etc/sysctl.d/99-sigmaos-hardening.conf"]="0:0:644"
   ["/etc/apparmor.d"]="0:0:755"
   ["/usr/share/sigmaos"]="0:0:755"
