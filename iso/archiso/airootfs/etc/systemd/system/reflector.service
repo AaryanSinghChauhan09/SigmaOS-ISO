@@ -1,0 +1,13 @@
+[Unit]
+Description=Update Pacman Mirror List with Reflector
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/reflector --protocol https --score 5 --sort rate --save /etc/pacman.d/mirrorlist
+PrivateTmp=true
+IPNetworkDeny=any
+
+[Install]
+RequiredBy=multi-user.target
