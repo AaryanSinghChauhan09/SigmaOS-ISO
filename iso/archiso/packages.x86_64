@@ -26,7 +26,6 @@ bash-completion
 
 # ── Security Hardening ───────────────────────────────────────────────────────────
 apparmor
-apparmor-utils
 audit
 
 # ── Storage & Filesystems ─────────────────────────────────────────────────────
