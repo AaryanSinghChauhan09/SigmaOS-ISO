@@ -8,9 +8,9 @@
     "margin-left": 0,
     "margin-right": 0,
 
-    "modules-left": ["hyprland/workspaces", "hyprland/window"],
+    "modules-left": ["hyprland/workspaces", "hyprland/window", "custom/appmenu"],
     "modules-center": ["clock"],
-    "modules-right": ["tray", "pulseaudio", "network", "cpu", "memory", "battery"],
+    "modules-right": ["custom/media", "tray", "pulseaudio", "network", "cpu", "memory", "battery"],
 
     "hyprland/workspaces": {
         "disable-scroll": true,
@@ -94,5 +94,19 @@
         "format-charging": " {capacity}%",
         "format-plugged": " {capacity}%",
         "format-icons": ["", "", "", "", ""]
+    },
+
+    "custom/appmenu": {
+        "format": "",
+        "tooltip": false,
+        "on-click": "rofi -show drun"
+    },
+
+    "custom/media": {
+        "format": "{} {}",
+        "return-type": "json",
+        "max-length": 40,
+        "interval": 5,
+        "exec": "playerctl -F metadata --format '{\"text\": \"{{markup_escape(title)}} - {{artist}}\", \"tooltip\": \"{{playerName}}: {{markup_escape(title)}}\", \"alt\": \"{{status}}\"}' 2>/dev/null || echo '{\"text\": \"\", \"tooltip\": \"\", \"alt\": \"\"}'"
     }
 }
