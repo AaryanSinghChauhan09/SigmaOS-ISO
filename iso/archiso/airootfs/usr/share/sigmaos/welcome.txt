@@ -1,27 +1,50 @@
-Welcome to SigmaOS
-==================
+SigmaOS — Sovereign Arch-Based Desktop
+================================================================================
 
-An Arch-based Linux desktop with a pre-configured Hyprland session.
+Welcome to SigmaOS, a modular, security-hardened distribution that absorbs
+the best of Arch Linux and Omarchy while providing better defaults.
 
-ESSENTIAL KEYS
-  SUPER+ENTER      terminal (foot)
-  SUPER+D          app launcher (rofi)
-  SUPER+SPACE      app launcher (alternate)
-  SUPER+E          file manager (Thunar)
-  SUPER+arrows     move focus
-  SUPER+SHIFT+arrows  move window
-  SUPER+1..0       switch workspace
-  SUPER+S          screenshot
-  SUPER+CTRL+L     lock screen
-  SUPER+M          exit desktop
+SigmaOS Advantages Over Arch & Omarchy
+================================================================================
 
-TOOLS
-  sigmaos-doctor   check system health (display, network, audio, disk)
-  sigmaos-theme    switch theme: list | catppuccin | tokyo-night | gruvbox | reset
+Security:
+  • AppArmor ENABLED by default with enforcement mode (Arch/Omarchy: disabled)
+  • Kernel hardening via sysctl (ASLR, ptrace restrictions, network hardening)
+  • Auditd pre-installed for security event logging
+  • Secure Boot signing tools included (sbctl, tpm2-tools)
 
-HELP
-  Website:  https://aaryansinghchauhan09.github.io/Sigma/download.html
-  Docs:     https://aaryansinghchauhan09.github.io/Sigma/
-  Issues:   https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/issues
+UX/VM Experience:
+  • Software-rendering fallbacks enabled (pixman, llvmpipe) — works in VMs
+    where Arch/Omarchy often fail to render Hyprland
+  • Better Wayland support out of the box with full PipeWire stack
 
-Tip: press SUPER+D and type "doctor" for a system health check.
+Desktop:
+  • Hyprland + Waybar + Quickshell pre-configured with modern defaults
+  • Better theme system (SigmaOS Theme Registry) with dynamic switching
+  • Integrated installer (sigmaos-install) with BTRFS snapshots support
+
+Shortcuts (Hyprland)
+================================================================================
+  SUPER + Q        Close window
+  SUPER + D        Launcher (Rofi)
+  SUPER + Enter    Terminal (foot)
+  SUPER + Shift + Q  Kill window
+  SUPER + W        Toggle floating
+  SUPER + [1-9]    Switch workspace
+  SUPER + Shift + [1-9]  Move to workspace
+  SUPER + F        Toggle fullscreen
+
+Useful Commands
+================================================================================
+  sigmaos-doctor          Check system health
+  sigmaos-theme-picker    Switch themes
+  sigmaos-snapshot        Create BTRFS snapshot
+  sigmaos-update          System update
+  aa-status               Check AppArmor status
+  sudo sigmaos-install    Install SigmaOS to disk
+
+Documentation & Community
+================================================================================
+  https://github.com/AaryanSinghChauhan09/SigmaOS
+
+Press Enter to close...

@@ -13,7 +13,8 @@ bootmodes=('bios.syslinux' 'uefi.systemd-boot')
 arch="x86_64"
 # Serial console output makes firmware-level boot failures diagnosable in
 # QEMU/CI and on headless hardware; harmless on machines without a serial port.
-kernel_params_x86_64="console=ttyS0"
+# AppArmor enabled for better security than default Arch/Omarchy.
+kernel_params_x86_64="console=ttyS0 apparmor=1 security=apparmor"
 pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
 airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '19')
@@ -35,4 +36,10 @@ file_permissions=(
   ["/usr/local/bin/sigmaos-update"]="0:0:755"
   ["/usr/local/bin/sigmaos-welcome"]="0:0:755"
   ["/etc/skel/.config/hypr/autostart.sh"]="0:0:755"
+  ["/etc/systemd/system/apparmor-enforce.service"]="0:0:644"
+  ["/etc/systemd/system/sysinit.target.wants/apparmor-enforce.service"]="0:0:777"
+  ["/etc/sysctl.d/99-sigmaos-hardening.conf"]="0:0:644"
+  ["/etc/apparmor.d"]="0:0:755"
+  ["/usr/share/sigmaos"]="0:0:755"
+  ["/usr/share/sigmaos/welcome.txt"]="0:0:644"
 )

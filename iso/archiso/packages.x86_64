@@ -24,6 +24,11 @@ man-db
 man-pages
 bash-completion
 
+# ── Security Hardening ───────────────────────────────────────────────────────────
+apparmor
+apparmor-utils
+audit
+
 # ── Storage & Filesystems ─────────────────────────────────────────────────────
 btrfs-progs
 e2fsprogs

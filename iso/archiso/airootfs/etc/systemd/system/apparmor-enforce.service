@@ -1,0 +1,14 @@
+[Unit]
+Description=Enable AppArmor enforcement mode for better security
+Before=sysinit.target
+DefaultDependencies=no
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/aa-enforce /etc/apparmor.d/*
+ExecStart=/usr/bin/aa-status
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
