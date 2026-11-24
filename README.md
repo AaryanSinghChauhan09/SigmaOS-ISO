@@ -1,7 +1,7 @@
 # SigmaOS-ISO
 
 The bootable SigmaOS system: an Arch-based live ISO with a pre-configured
-Omarchy-inspired Hyprland desktop, plus the installer and release pipeline.
+SigmaOS-inspired Hyprland desktop, plus the installer and release pipeline.
 This is the repository that produces the downloadable `.iso`.
 
 SigmaOS is **not** a custom-kernel project — it ships the stock Arch Linux
