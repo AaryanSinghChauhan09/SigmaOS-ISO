@@ -17,6 +17,7 @@ syslinux
 mkinitcpio-archiso
 arch-install-scripts
 pacman-contrib
+archlinux-keyring
 gptfdisk
 sudo
 which
