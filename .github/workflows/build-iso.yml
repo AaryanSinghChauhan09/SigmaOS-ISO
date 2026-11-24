@@ -77,6 +77,15 @@ jobs:
     - name: Boot smoke test (QEMU)
       run: bash scripts/ci/qemu_iso_boot.sh "$(ls out/*.iso | head -1)" out/qemu-boot 1500
 
+    # Real firmware regression test: boots the ISO as a CD under SeaBIOS and
+    # OVMF and requires kernel/userspace markers on the serial console
+    # (boot entries carry console=ttyS0). Catches El Torito/catalog bugs
+    # that a direct -kernel/-initrd boot can never see.
+    - name: Firmware boot test (BIOS + UEFI)
+      run: |
+        sudo apt-get install -y -qq ovmf >/dev/null
+        bash scripts/ci/qemu_firmware_boot.sh "$(ls out/*.iso | head -1)" both out/fw-boot 900
+
     - name: Get ISO filename
       id: iso-name
       run: |

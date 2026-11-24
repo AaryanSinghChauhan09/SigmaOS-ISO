@@ -11,6 +11,9 @@ install_dir="sigmaos"
 buildmodes=('iso')
 bootmodes=('bios.syslinux' 'uefi.systemd-boot')
 arch="x86_64"
+# Serial console output makes firmware-level boot failures diagnosable in
+# QEMU/CI and on headless hardware; harmless on machines without a serial port.
+kernel_params_x86_64="console=ttyS0"
 pacman_conf="pacman.conf"
 airootfs_image_type="squashfs"
 airootfs_image_tool_options=('-comp' 'zstd' '-Xcompression-level' '19')
@@ -22,10 +25,14 @@ file_permissions=(
   ["/usr/local/bin/Installation_guide"]="0:0:755"
   ["/usr/local/bin/livecd-sound"]="0:0:755"
   ["/usr/local/bin/sigma-aur"]="0:0:755"
+  ["/usr/local/bin/sigmaos-doctor"]="0:0:755"
   ["/usr/local/bin/sigmaos-install"]="0:0:755"
   ["/usr/local/bin/sigmaos-provision-owner"]="0:0:755"
   ["/usr/local/bin/sigmaos-secureboot"]="0:0:755"
   ["/usr/local/bin/sigmaos-snapshot"]="0:0:755"
+  ["/usr/local/bin/sigmaos-theme"]="0:0:755"
+  ["/usr/local/bin/sigmaos-theme-picker"]="0:0:755"
   ["/usr/local/bin/sigmaos-update"]="0:0:755"
+  ["/usr/local/bin/sigmaos-welcome"]="0:0:755"
   ["/etc/skel/.config/hypr/autostart.sh"]="0:0:755"
 )

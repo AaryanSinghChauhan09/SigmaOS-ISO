@@ -221,7 +221,7 @@ build_docker() {
       # empty/broken iso.pacman.conf. Always start from a clean work dir.
       rm -rf /work/iso-work
       echo '[docker] Running mkarchiso...'
-      mkarchiso --noconfirm -v -w /work/iso-work -o /out /profile
+      mkarchiso -v -w /work/iso-work -o /out /profile
       echo '[docker] Build complete.'
     " 2>&1 | tee "$OUT_DIR/build.log"
 
@@ -253,7 +253,7 @@ build_native() {
   info "Profile:  $PROFILE_DIR"
   info "Output:   $OUT_DIR"
 
-  mkarchiso --noconfirm -v -w "$WORK_DIR" -o "$OUT_DIR" "$PROFILE_DIR" 2>&1 | tee "$OUT_DIR/build.log"
+  mkarchiso -v -w "$WORK_DIR" -o "$OUT_DIR" "$PROFILE_DIR" 2>&1 | tee "$OUT_DIR/build.log"
 
   if ls "$OUT_DIR"/*.iso &>/dev/null; then
     success "ISO built: $(ls "$OUT_DIR"/*.iso)"
