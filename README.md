@@ -133,3 +133,12 @@ qemu-system-x86_64 -m 4G -enable-kvm -cdrom out/*.iso
   (needs enrolled keys), snapshot/rollback features, NVIDIA hardware.
 
 Report issues: <https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/issues>
+
+## Documentation
+
+Detailed Wiki documentation is available in the standalone Wiki repository:
+
+- [SigmaOS-ISO-Wiki](https://github.com/AaryanSinghChauhan09/SigmaOS-ISO-Wiki) - Full Wiki documentation
+
+For the complete SigmaOS Wiki catalog, see:
+- [SigmaOS Wiki Staging](https://github.com/AaryanSinghChauhan09/sigmaos-wiki-staging)
