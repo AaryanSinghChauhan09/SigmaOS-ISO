@@ -1,0 +1,66 @@
+name: Installer E2E (QEMU)
+
+# Full destructive-install test: boots the ISO, runs sigmaos-install against a
+# blank virtio disk answering every interactive prompt, then boots the
+# installed disk under OVMF and requires systemd/userspace serial markers.
+#
+# Not run on every push — pacstrap pulls ~800 packages and takes tens of
+# minutes even on fast mirrors. Runs on manual dispatch and weekly so
+# installer/network regressions are caught without taxing PR CI.
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'   # Mondays 06:00 UTC
+
+jobs:
+  installer-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install QEMU, OVMF, mtools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-system-x86 ovmf mtools xorriso \
+            qemu-utils python3 >/dev/null
+
+      - name: Download latest release ISO
+        id: iso
+        run: |
+          mkdir -p artifacts
+          # Release assets are split .part files; fetch all parts + sha256.
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern '*.iso.*' \
+            --dir artifacts --clobber
+          python3 - <<'PY'
+          import glob, hashlib, os, re
+          parts = sorted(glob.glob('artifacts/*.iso.*.part'))
+          if not parts:
+              raise SystemExit('no .iso.*.part assets found')
+          out = 'artifacts/sigmaos-e2e.iso'
+          h = hashlib.sha256()
+          with open(out, 'wb') as w:
+              for p in parts:
+                  with open(p, 'rb') as f:
+                      for chunk in iter(lambda: f.read(1 << 22), b''):
+                          w.write(chunk); h.update(chunk)
+          want = open('artifacts/' + os.path.basename(parts[0]).split('.iso.')[0] + '.iso.sha256').read().split()[0]
+          got = h.hexdigest()
+          assert got == want, f'sha256 mismatch: {got} != {want}'
+          print(f'ISO ok: {out} sha256={got}')
+          PY
+          echo "iso=artifacts/sigmaos-e2e.iso" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run end-to-end install test
+        run: bash scripts/ci/qemu_installer_e2e.sh "${{ steps.iso.outputs.iso }}" out/e2e 2400 600
+
+      - name: Upload serial log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-e2e-serial
+          path: out/e2e/
+          if-no-files-found: ignore
