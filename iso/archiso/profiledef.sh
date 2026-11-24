@@ -42,4 +42,5 @@ file_permissions=(
   ["/etc/apparmor.d"]="0:0:755"
   ["/usr/share/sigmaos"]="0:0:755"
   ["/usr/share/sigmaos/welcome.txt"]="0:0:644"
+  ["/etc/skel/.config/starship.toml"]="0:0:644"
 )

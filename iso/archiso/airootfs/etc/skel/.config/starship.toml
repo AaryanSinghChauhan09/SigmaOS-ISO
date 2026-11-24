@@ -1,27 +1,155 @@
-# SigmaOS starship prompt — fast, informative, SigmaOS-branded.
+# SigmaOS Starship Prompt Configuration
+# Better defaults than Arch/Omarchy starship configs
+
 format = """
-$directory$git_branch$git_status$cmd_duration$line_break$character"""
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_status\
+$docker_context\
+$package\
+$golang\
+$python\
+$rust\
+$nodejs\
+$fill\
+$cmd_duration\
+$line_break\
+$jobs\
+$battery\
+$time\
+$character"""
+
+# Use custom SigmaOS-inspired colors
+palette = 'sigmaos'
+
+[palettes.sigmaos]
+os_blue = '#33ccff'
+os_green = '#00ff99'
+os_purple = '#ff6699'
+os_gray = '#585b70'
+os_red = '#ff6b6b'
+os_yellow = '#ffead4'
 
 [directory]
-truncation_length = 3
-style = "bold cyan"
+style = "bold os_blue"
 format = "[$path]($style)[$read_only]($read_only_style) "
+read_only = " "
+read_only_style = "os_red"
+truncation_length = 3
+truncate_to_repo = true
 
 [git_branch]
-symbol = ""
-style = "bold purple"
+style = "os_green"
 format = "[$symbol$branch]($style) "
+symbol = ""
 
 [git_status]
-style = "bold red"
-format = '([$all_status$ahead_behind]($style) )'
+style = "os_yellow"
+format = "[$all_status]($style) "
+conflicted = ""
+ahead = ""
+behind = ""
+diverged = ""
+untracked = ""
+modified = ""
+staged = ""
+renamed = ""
+deleted = ""
+
+[git_commit]
+style = "os_gray"
+format = "[($hash$tag)]($style) "
+commit_hash_length = 7
+tag_disabled = false
+tag_symbol = ""
+
+[git_state]
+style = "os_red"
+format = "[$state( $progress_current/$progress_total)]($style) "
+
+[docker_context]
+style = "os_blue"
+format = "[$symbol$context]($style) "
+symbol = ""
+
+[package]
+style = "os_purple"
+format = "[$symbol$version]($style) "
+symbol = ""
+display_private = false
+
+[golang]
+style = "os_blue"
+format = "[$symbol($version)]($style) "
+symbol = ""
+
+[python]
+style = "os_yellow"
+format = "[${symbol}${pyenv_prefix}(${version})(\\($virtualenv\\))]($style) "
+symbol = ""
+pyenv_prefix = ""
+
+[rust]
+style = "os_red"
+format = "[$symbol($version)]($style) "
+symbol = ""
+
+[nodejs]
+style = "os_green"
+format = "[$symbol($version)]($style) "
+symbol = ""
+
+[fill]
+symbol = " "
 
 [cmd_duration]
+style = "os_gray"
+format = "[$duration]($style) "
 min_time = 2000
-style = "bold yellow"
-format = "took [$duration]($style) "
+show_milliseconds = false
+
+[line_break]
+disabled = false
+
+[jobs]
+style = "os_yellow"
+format = "[$symbol$number]($style) "
+symbol = ""
+number_threshold = 1
+
+[battery]
+disabled = false
+format = "[$symbol$percentage]($style) "
+charging_symbol = ""
+discharging_symbol = ""
+unknown_symbol = ""
+empty_symbol = ""
+full_symbol = ""
+
+[[battery.display]]
+threshold = 10
+style = "os_red"
+
+[[battery.display]]
+threshold = 30
+style = "os_yellow"
+
+[[battery.display]]
+threshold = 100
+style = "os_green"
+
+[time]
+style = "os_gray"
+format = "[$time]($style) "
+disabled = false
+time_format = "%H:%M"
 
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
-vimcmd_symbol = "[❮](bold green)"
+success_symbol = "[❯](os_green)"
+error_symbol = "[❯](os_red)"
+vimcmd_symbol = "[❮](os_green)"
+vimcmd_replace_one_symbol = "[❮](os_purple)"
+vimcmd_replace_symbol = "[❮](os_purple)"
+vimcmd_visual_symbol = "[❮](os_yellow)"
