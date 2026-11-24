@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Creating SigmaOS Btrfs snapshot before upgrade...
+When = PreTransaction
+Exec = /usr/local/bin/sigmaos-snapshot hook pre

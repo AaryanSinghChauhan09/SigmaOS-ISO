@@ -43,4 +43,7 @@ file_permissions=(
   ["/usr/share/sigmaos"]="0:0:755"
   ["/usr/share/sigmaos/welcome.txt"]="0:0:644"
   ["/etc/skel/.config/starship.toml"]="0:0:644"
+  ["/etc/pacman.d/hooks"]="0:0:755"
+  ["/etc/pacman.d/hooks/50-sigmaos-snapshot-pre.hook"]="0:0:644"
+  ["/etc/pacman.d/hooks/90-sigmaos-snapshot-post.hook"]="0:0:644"
 )
