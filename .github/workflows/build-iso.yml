@@ -86,6 +86,12 @@ jobs:
         sudo apt-get install -y -qq ovmf >/dev/null
         bash scripts/ci/qemu_firmware_boot.sh "$(ls out/*.iso | head -1)" both out/fw-boot 900
 
+    # Installer safety test: boots the ISO with a blank virtual disk, logs in
+    # on the serial console, runs `sigmaos-install --dry-run`, and verifies
+    # the plan prints while the disk stays untouched.
+    - name: Installer dry-run test (QEMU)
+      run: bash scripts/ci/qemu_installer_dryrun.sh "$(ls out/*.iso | head -1)" out/inst-test 1200
+
     - name: Get ISO filename
       id: iso-name
       run: |
