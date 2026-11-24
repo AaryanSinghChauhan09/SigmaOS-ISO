@@ -24,9 +24,9 @@ This matrix compares SigmaOS against Arch Linux and Omarchy Linux across key are
 | Feature | SigmaOS | Arch | Omarchy | Evidence |
 |---------|---------|------|---------|----------|
 | pacman integration | ✓ | Native | Native | Uses standard pacman |
-| Signed packages | ✓ | Yes | Yes | AppArmor + security hardening |
-| Keyring management | ○ | archlinux-keyring | Custom | Has SigmaOS-keyring repo, needs verification |
-| Mirror selection | ○ | reflector | Custom | Needs mirror configuration verification |
+| Signed packages | ✓ | Yes | Yes | AppArmor + security hardening, archlinux-keyring added |
+| Keyring management | ✓ | archlinux-keyring | Custom | archlinux-keyring package added to ISO |
+| Mirror selection | ✓ | reflector | Custom | reflector package + weekly systemd timer added |
 | Dependency resolution | ✓ | Native | Native | Uses pacman's solver |
 | Conflict handling | ✓ | Native | Native | Uses pacman's conflict resolution |
 | Interrupted upgrade recovery | ○ | Manual | Partial | BTRFS snapshots enable rollback |
