@@ -57,8 +57,8 @@ if [[ $DRY_RUN -eq 1 ]]; then
 [WARN] DRY RUN — nothing will be written.
 [PLAN] Disk:        $TARGET_DEV
 [PLAN]   p1: 1 GiB  FAT32   -> /boot   (EFI System Partition)
-[PLAN]   p2: rest   Btrfs   -> /       subvols: @ @home @snapshots @var_log
-[PLAN] FS:          btrfs compress=zstd:3,noatime
+[PLAN]   p2: rest   Btrfs   -> /       subvols: @ @home @snapshots @var_log @var_tmp
+[PLAN] FS:          btrfs compress=zstd:3,noatime (+ SSD optimizations if detected)
 [PLAN] Bootloader:  GRUB (UEFI)
 [PLAN] Desktop:     Hyprland + waybar + foot + thunar + pipewire
 [PLAN] Packages:    desktop-parity set (see pacstrap below)
@@ -118,26 +118,47 @@ mkfs.btrfs -f -L SIGMAOS_ROOT "$P_ROOT"
 echo "[3/9] Creating Btrfs subvolumes..."
 mkdir -p "$MNT"
 mount "$P_ROOT" "$MNT"
-for sv in @ @home @snapshots @var_log; do btrfs subvolume create "$MNT/$sv"; done
+for sv in @ @home @snapshots @var_log @var_tmp; do btrfs subvolume create "$MNT/$sv"; done
 umount "$MNT"
 
 echo "[4/9] Mounting subvolumes..."
-mount -o noatime,compress=zstd:3,subvol=@         "$P_ROOT" "$MNT"
-mkdir -p "$MNT"/{boot,home,.snapshots,var/log}
-mount -o noatime,compress=zstd:3,subvol=@home      "$P_ROOT" "$MNT/home"
-mount -o noatime,compress=zstd:3,subvol=@snapshots "$P_ROOT" "$MNT/.snapshots"
-mount -o noatime,compress=zstd:3,subvol=@var_log   "$P_ROOT" "$MNT/var/log"
+# Detect SSD for optimal mount options
+SSD_OPTS=""
+if grep -q '^0$' "/sys/block/$(basename "$TARGET_DEV")/queue/rotational" 2>/dev/null; then
+    SSD_OPTS=",ssd,discard=async"
+    echo "[INFO] SSD detected: enabling ssd,discard=async options"
+fi
+ROOT_OPTS="noatime,compress=zstd:3${SSD_OPTS}"
+mount -o ${ROOT_OPTS},subvol=@         "$P_ROOT" "$MNT"
+mkdir -p "$MNT"/{boot,home,.snapshots,var/log,var/tmp}
+mount -o ${ROOT_OPTS},subvol=@home      "$P_ROOT" "$MNT/home"
+mount -o ${ROOT_OPTS},subvol=@snapshots "$P_ROOT" "$MNT/.snapshots"
+mount -o ${ROOT_OPTS},subvol=@var_log   "$P_ROOT" "$MNT/var/log"
+mount -o ${ROOT_OPTS},subvol=@var_tmp  "$P_ROOT" "$MNT/var/tmp"
 mount "$P_EFI" "$MNT/boot"
 
 echo "[5/9] Writing fstab..."
 mkdir -p "$MNT/etc"
-cat > "$MNT/etc/fstab" <<'EOF'
+# Write fstab with SSD options if detected
+if [[ -n "$SSD_OPTS" ]]; then
+    cat > "$MNT/etc/fstab" <<EOF
+LABEL=SIGMAOS_ROOT  /            btrfs  rw,noatime,compress=zstd:3${SSD_OPTS},subvol=@          0 0
+LABEL=SIGMAOS_ROOT  /home        btrfs  rw,noatime,compress=zstd:3${SSD_OPTS},subvol=@home      0 0
+LABEL=SIGMAOS_ROOT  /.snapshots  btrfs  rw,noatime,compress=zstd:3${SSD_OPTS},subvol=@snapshots 0 0
+LABEL=SIGMAOS_ROOT  /var/log     btrfs  rw,noatime,compress=zstd:3${SSD_OPTS},subvol=@var_log   0 0
+LABEL=SIGMAOS_ROOT  /var/tmp     btrfs  rw,noatime,compress=zstd:3${SSD_OPTS},subvol=@var_tmp  0 0
+LABEL=SIGMAOS_EFI   /boot        vfat   rw,relatime,fmask=0022,dmask=0022            0 2
+EOF
+else
+    cat > "$MNT/etc/fstab" <<'EOF'
 LABEL=SIGMAOS_ROOT  /            btrfs  rw,noatime,compress=zstd:3,subvol=@          0 0
 LABEL=SIGMAOS_ROOT  /home        btrfs  rw,noatime,compress=zstd:3,subvol=@home      0 0
 LABEL=SIGMAOS_ROOT  /.snapshots  btrfs  rw,noatime,compress=zstd:3,subvol=@snapshots 0 0
 LABEL=SIGMAOS_ROOT  /var/log     btrfs  rw,noatime,compress=zstd:3,subvol=@var_log   0 0
+LABEL=SIGMAOS_ROOT  /var/tmp     btrfs  rw,noatime,compress=zstd:3,subvol=@var_tmp  0 0
 LABEL=SIGMAOS_EFI   /boot        vfat   rw,relatime,fmask=0022,dmask=0022            0 2
 EOF
+fi
 
 echo "[6/9] Installing system with pacstrap (desktop-parity package set)..."
 # pacman has no per-package mirror failover: one stalled mirror aborts the
