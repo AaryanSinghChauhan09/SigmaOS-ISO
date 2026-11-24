@@ -94,13 +94,42 @@ qemu-system-x86_64 -m 4G -enable-kvm -cdrom out/*.iso
 - `scripts/` — build, signing, reassembly, CI helpers
 - `installer/` — `sigmaos-install` implementation
 
+## Compatibility matrix
+
+| Platform | Status |
+|---|---|
+| BIOS boot (SeaBIOS, syslinux) | Verified in QEMU |
+| UEFI boot (OVMF/EDK2, systemd-boot) | Verified in QEMU (2026.11.24+) |
+| `dd`-written USB | Supported (hybrid ISO) |
+| Secure Boot | Not supported — image is unsigned |
+| NVIDIA GPUs | Experimental — untested |
+| aarch64 / ARM | Not supported (x86_64 only) |
+
+## Known issues
+
+- Releases before `sigmaos-desktop-2026.11.24-uefi` have a broken UEFI
+  boot path — use BIOS mode or upgrade to the 2026.11.24 release.
+- Full OS installation (`sigmaos-install --destructive`) is experimental;
+  the dry-run and disk-safety paths are CI-tested, end-to-end install is
+  not yet verified.
+- Snapshot/rollback features are not yet implemented end-to-end; do not
+  rely on them.
+
+## Recovery
+
+- **Bad theme/config:** `sigmaos-theme reset` restores defaults (backs up
+  current config first); `sigmaos-doctor` (SUPER+/) diagnoses session,
+  network, audio, disk, and update problems.
+- **Boot problems:** boot the ISO in a VM first; the live session needs no
+  installation. Serial console (`console=ttyS0`) shows kernel logs.
+- **Failed updates:** boot the previous known-good environment; package
+  state can be inspected with `pacman -Q` / `journalctl -b -p err`.
+
 ## Support status
 
-- **Verified:** BIOS boot in QEMU, live Hyprland session, MVP tools present
-  in the shipped image.
-- **In verification:** UEFI boot — the current release's UEFI path is being
-  re-tested; do not rely on it until a release notes UEFI as verified.
+- **Verified:** BIOS + UEFI boot in QEMU, live Hyprland session, MVP tools
+  present in the shipped image, installer dry-run safety in QEMU.
 - **Experimental:** installer end-to-end install in VM, Secure Boot signing
-  (needs enrolled keys), snapshot/rollback features.
+  (needs enrolled keys), snapshot/rollback features, NVIDIA hardware.
 
 Report issues: <https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/issues>
