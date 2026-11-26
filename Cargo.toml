@@ -17,6 +17,7 @@ categories = ["os", "command-line-utilities"]
 default = ["std"]
 std = []
 no_std = []
+standalone_test = []
 
 [profile.dev]
 opt-level = 0

@@ -9,8 +9,6 @@
 // - ZFS/Btrfs snapshots
 // - Multi-boot configuration
 
-#![no_std]
-
 extern crate alloc;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -449,6 +447,12 @@ impl LightningInstaller {
     fn get_time_seconds() -> u64 {
         // In real implementation, would get actual time
         0
+    }
+}
+
+impl Default for LightningInstaller {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

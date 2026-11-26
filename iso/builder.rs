@@ -90,7 +90,7 @@ pub enum SquashfsCompression {
 
 impl Default for IsoBuildConfig {
     fn default() -> Self {
-        let mut packages = vec![
+        let packages = vec![
             "sigma-base".to_string(),
             "sigma-kernel".to_string(),
             "sigma-desktop".to_string(),

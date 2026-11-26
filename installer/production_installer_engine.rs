@@ -5,7 +5,6 @@
 // - linuxmint: Ubiquity/Calamares-style user-friendliness, Timeshift pre-install snapshot, driver probe
 // - omacom/omarchy: post-install developer profile setup and fast minimal footprint
 
-use std::collections::BTreeMap;
 use std::string::String;
 use std::vec::Vec;
 
@@ -72,24 +71,24 @@ impl ProductionInstallerEngine {
 
     /// Discover available disks (simulates sysfs /sys/class/block scanning)
     pub fn probe_block_devices(&mut self) -> Vec<DiscoveredBlockDevice> {
-        let mut devices = Vec::new();
-        devices.push(DiscoveredBlockDevice {
-            name: "/dev/vda".into(),
-            model: "VirtIO Block Device".into(),
-            size_sectors: 104_857_600, // 50 GB
-            sector_size_bytes: 512,
-            is_removable: false,
-            is_rotational: false,
-        });
-        devices.push(DiscoveredBlockDevice {
-            name: "/dev/nvme0n1".into(),
-            model: "Samsung NVMe SSD 980".into(),
-            size_sectors: 1_000_215_216, // ~512 GB
-            sector_size_bytes: 512,
-            is_removable: false,
-            is_rotational: false,
-        });
-        devices
+        vec![
+            DiscoveredBlockDevice {
+                name: "/dev/vda".into(),
+                model: "VirtIO Block Device".into(),
+                size_sectors: 104_857_600, // 50 GB
+                sector_size_bytes: 512,
+                is_removable: false,
+                is_rotational: false,
+            },
+            DiscoveredBlockDevice {
+                name: "/dev/nvme0n1".into(),
+                model: "Samsung NVMe SSD 980".into(),
+                size_sectors: 1_000_215_216, // ~512 GB
+                sector_size_bytes: 512,
+                is_removable: false,
+                is_rotational: false,
+            },
+        ]
     }
 
     /// Select installation target and generate standard x86_64 UEFI partition layout

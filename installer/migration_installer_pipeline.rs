@@ -19,12 +19,7 @@
 extern crate alloc;
 
 #[cfg(not(any(feature = "standalone_test", test)))]
-use alloc::{
-    collections::BTreeMap,
-    format,
-    string::{String, ToString},
-    vec::Vec,
-};
+use alloc::string::{String, ToString};
 
 #[cfg(any(feature = "standalone_test", test))]
 use std::string::{String, ToString};

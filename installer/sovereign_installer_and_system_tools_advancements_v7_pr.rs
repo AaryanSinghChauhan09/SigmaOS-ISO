@@ -226,19 +226,20 @@ pub struct CalamaresModularWizardEngineV7 {
 
 impl CalamaresModularWizardEngineV7 {
     pub fn new() -> Self {
-        let mut wizard = Self::default();
-        wizard.step_queue = vec![
-            "welcome".to_string(),
-            "location".to_string(),
-            "keyboard".to_string(),
-            "partition".to_string(),
-            "users".to_string(),
-            "summary".to_string(),
-            "exec_install".to_string(),
-            "finish".to_string(),
-        ];
-        wizard.plymouth_transition_hook_active = true;
-        wizard
+        Self {
+            step_queue: vec![
+                "welcome".to_string(),
+                "location".to_string(),
+                "keyboard".to_string(),
+                "partition".to_string(),
+                "users".to_string(),
+                "summary".to_string(),
+                "exec_install".to_string(),
+                "finish".to_string(),
+            ],
+            plymouth_transition_hook_active: true,
+            ..Default::default()
+        }
     }
 
     /// Auto-detect system GPU hardware for driver installation
@@ -453,12 +454,13 @@ pub struct BsdinstallAutoinstallEngineV7 {
 
 impl BsdinstallAutoinstallEngineV7 {
     pub fn new() -> Self {
-        let mut bsd = Self::default();
-        bsd.bsd_flavor = "FreeBSD 14.1-RELEASE".to_string();
-        bsd.zroot_pool_name = "zroot".to_string();
-        bsd.bectl_bootenv_active = true;
-        bsd.pledge_unveil_sandboxed = true;
-        bsd
+        Self {
+            bsd_flavor: "FreeBSD 14.1-RELEASE".to_string(),
+            zroot_pool_name: "zroot".to_string(),
+            bectl_bootenv_active: true,
+            pledge_unveil_sandboxed: true,
+            ..Default::default()
+        }
     }
 
     /// Provision ZFS bectl boot environment topology and VNET network jails
@@ -492,19 +494,20 @@ pub struct DracutEventDrivenInitramfsEngineV7 {
 
 impl DracutEventDrivenInitramfsEngineV7 {
     pub fn new() -> Self {
-        let mut dracut = Self::default();
-        dracut.modules = vec![
-            "base".to_string(),
-            "systemd".to_string(),
-            "dracut-systemd".to_string(),
-            "bcachefs".to_string(),
-            "zfs".to_string(),
-            "tpm2-tss".to_string(),
-            "network-legacy".to_string(),
-        ];
-        dracut.hostonly_mode = true;
-        dracut.early_ipv6_active = true;
-        dracut
+        Self {
+            modules: vec![
+                "base".to_string(),
+                "systemd".to_string(),
+                "dracut-systemd".to_string(),
+                "bcachefs".to_string(),
+                "zfs".to_string(),
+                "tpm2-tss".to_string(),
+                "network-legacy".to_string(),
+            ],
+            hostonly_mode: true,
+            early_ipv6_active: true,
+            ..Default::default()
+        }
     }
 
     /// Attach eBPF early boot tracing probe and measure TPM2 PCR 0-15 policy
@@ -535,19 +538,20 @@ pub struct MkinitcpioHookEngineV7 {
 
 impl MkinitcpioHookEngineV7 {
     pub fn new() -> Self {
-        let mut mk = Self::default();
-        mk.hooks = vec![
-            "base".to_string(),
-            "udev".to_string(),
-            "autodetect".to_string(),
-            "modconf".to_string(),
-            "block".to_string(),
-            "filesystems".to_string(),
-            "keyboard".to_string(),
-            "fsck".to_string(),
-        ];
-        mk.zstd_compression_level = 19;
-        mk
+        Self {
+            hooks: vec![
+                "base".to_string(),
+                "udev".to_string(),
+                "autodetect".to_string(),
+                "modconf".to_string(),
+                "block".to_string(),
+                "filesystems".to_string(),
+                "keyboard".to_string(),
+                "fsck".to_string(),
+            ],
+            zstd_compression_level: 19,
+            ..Default::default()
+        }
     }
 
     /// Splice CPU early microcode payload and compress initramfs image
@@ -614,9 +618,10 @@ pub struct AnsibleAgentlessEngineV7 {
 
 impl AnsibleAgentlessEngineV7 {
     pub fn new() -> Self {
-        let mut ans = Self::default();
-        ans.async_workers = 32;
-        ans
+        Self {
+            async_workers: 32,
+            ..Default::default()
+        }
     }
 
     /// Decrypt Ansible Vault secret payload (AES-256-GCM / Argon2id)
@@ -749,15 +754,16 @@ pub struct CloudInitMultiStageEngineV7 {
 
 impl CloudInitMultiStageEngineV7 {
     pub fn new() -> Self {
-        let mut ci = Self::default();
-        ci.boot_stages = vec![
-            "generator".to_string(),
-            "local".to_string(),
-            "network".to_string(),
-            "final".to_string(),
-        ];
-        ci.active_cloud_provider = "AWS / OpenStack / Azure".to_string();
-        ci
+        Self {
+            boot_stages: vec![
+                "generator".to_string(),
+                "local".to_string(),
+                "network".to_string(),
+                "final".to_string(),
+            ],
+            active_cloud_provider: "AWS / OpenStack / Azure".to_string(),
+            ..Default::default()
+        }
     }
 
     /// Acquire IMDSv2 session token with dynamic token refresh
@@ -795,9 +801,10 @@ pub struct CoreOsIgnitionInitramfsEngineV7 {
 
 impl CoreOsIgnitionInitramfsEngineV7 {
     pub fn new() -> Self {
-        let mut ig = Self::default();
-        ig.spec_version = "3.5.0".to_string();
-        ig
+        Self {
+            spec_version: "3.5.0".to_string(),
+            ..Default::default()
+        }
     }
 
     /// Validate TLS client certificate attestation chain
@@ -876,8 +883,7 @@ impl SovereignInstallerAndSystemToolsMasterSuiteV7 {
             .archinstall
             .generate_uki_sbat_payload("/vmlinuz", "/initrd.img")?;
         let _ = self.bsdinstall.provision_zfs_bootenv_and_vnet("zroot")?;
-        let _ = self
-            .dracut
+        self.dracut
             .attach_ebpf_and_measure_tpm2("sys_enter_mount")?;
         let _ = self
             .mkinitcpio
@@ -889,7 +895,7 @@ impl SovereignInstallerAndSystemToolsMasterSuiteV7 {
         let _ = self.puppet.compile_catalog(hostname)?;
         let _ = self.chef.converge_and_report_metrics()?;
         let _ = self.cloud_init.acquire_imdsv2_session_token()?;
-        let _ = self.ignition.format_luks_device(target_disk)?;
+        self.ignition.format_luks_device(target_disk)?;
 
         Ok(format!(
             "Sovereign Master Installation & System Tools Pipeline V7 executed successfully on {} for {}",

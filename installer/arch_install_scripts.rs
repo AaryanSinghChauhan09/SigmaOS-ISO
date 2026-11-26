@@ -7,14 +7,12 @@
 // - `genfstab`: Declarative filesystem table generator (UUID / LABEL)
 // - `arch-chroot`: Isolated mount-namespace chroot manager with clean cleanup
 //
-// Modern Rust, #![no_std] compatible with alloc.
-
-#![no_std]
+// Modern Rust, alloc-compatible.
 
 extern crate alloc;
 
 use alloc::format;
-use alloc::string::{String, ToString};
+use alloc::string::String;
 use alloc::vec;
 use alloc::vec::Vec;
 

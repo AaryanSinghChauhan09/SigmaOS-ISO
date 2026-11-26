@@ -6,7 +6,6 @@
 // Btrfs subvolume layout provisioning (@root, @home, @snapshots, @swap), ZFS zroot pool creation,
 // and Calamares / archinstall non-interactive JSON configuration parsing.
 
-use std::collections::HashMap;
 use std::format;
 use std::string::{String, ToString};
 use std::vec::Vec;

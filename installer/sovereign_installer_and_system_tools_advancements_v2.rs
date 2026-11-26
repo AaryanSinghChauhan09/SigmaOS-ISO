@@ -172,8 +172,7 @@ impl AnacondaKickstartBlivetEngineV2 {
             is_thin_provisioned: false,
         });
 
-        let mut part_idx = 1;
-        for spec in &self.profile.partitions {
+        for (part_idx, spec) in (1..).zip(&self.profile.partitions) {
             let part_path = format!("{}p{}", target_disk, part_idx);
             let is_thin = spec.storage_type == KickstartStorageTypeV2::LvmThinLogicalVolume;
             self.blivet_tree.push(BlivetStorageDeviceV2 {
@@ -185,7 +184,6 @@ impl AnacondaKickstartBlivetEngineV2 {
                 is_encrypted: spec.encrypted,
                 is_thin_provisioned: is_thin,
             });
-            part_idx += 1;
         }
         self.blivet_tree.len()
     }
@@ -582,6 +580,12 @@ impl ArchinstallProfileGeneratorV2 {
         }
         self.chroot_commands = cmds.clone();
         cmds
+    }
+}
+
+impl Default for ArchinstallProfileGeneratorV2 {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

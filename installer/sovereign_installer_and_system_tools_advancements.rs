@@ -164,8 +164,7 @@ impl AnacondaStorageAndPayloadEngine {
             is_encrypted: false,
         });
 
-        let mut part_idx = 1;
-        for spec in &self.profile.partitions {
+        for (part_idx, spec) in (1..).zip(&self.profile.partitions) {
             let part_path = format!("{}p{}", target_disk, part_idx);
             self.blivet_tree.push(BlivetStorageDevice {
                 device_path: part_path,
@@ -175,7 +174,6 @@ impl AnacondaStorageAndPayloadEngine {
                 mountpoint: Some(spec.mountpoint.clone()),
                 is_encrypted: spec.encrypted,
             });
-            part_idx += 1;
         }
         self.blivet_tree.len()
     }
@@ -553,6 +551,12 @@ impl ArchinstallProfileEngine {
         }
         self.chroot_commands = cmds.clone();
         cmds
+    }
+}
+
+impl Default for ArchinstallProfileEngine {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

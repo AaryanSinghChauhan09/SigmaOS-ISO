@@ -690,12 +690,14 @@ pub struct PuppetRalCatalogCompilerEngineV5 {
 
 impl PuppetRalCatalogCompilerEngineV5 {
     pub fn new() -> Self {
-        let mut engine = Self::default();
-        engine.hiera_v5_hierarchy = vec![
-            "nodes/%{::trusted.certname}.yaml".to_string(),
-            "environment/%{::environment}.yaml".to_string(),
-            "common.yaml".to_string(),
-        ];
+        let mut engine = Self {
+            hiera_v5_hierarchy: vec![
+                "nodes/%{::trusted.certname}.yaml".to_string(),
+                "environment/%{::environment}.yaml".to_string(),
+                "common.yaml".to_string(),
+            ],
+            ..Default::default()
+        };
         engine
             .facter_facts
             .insert("kernel".to_string(), "SigmaOS".to_string());

@@ -239,6 +239,12 @@ impl SystemConfiguration {
     }
 }
 
+impl Default for SystemConfiguration {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// GUI Calamares-Style Installer Wizard Engine
 pub struct GuiInstallerWizard {
     pub current_screen: InstallerScreen,
@@ -553,10 +559,7 @@ impl PartitioningCalculator {
     }
 
     pub fn calculate_automatic_layout(&self) -> Vec<PartitionEntry> {
-        let mut partitions = Vec::new();
-
-        // Boot partition
-        partitions.push(
+        vec![
             PartitionEntry::new(
                 "/dev/sda1",
                 self.boot_size_mb,
@@ -564,33 +567,15 @@ impl PartitioningCalculator {
                 "/boot",
             )
             .with_flag("boot"),
-        );
-
-        // Swap partition
-        partitions.push(PartitionEntry::new(
-            "/dev/sda2",
-            self.swap_size_mb,
-            FilesystemType::Swap,
-            "swap",
-        ));
-
-        // Root partition
-        partitions.push(PartitionEntry::new(
-            "/dev/sda3",
-            self.root_size_mb,
-            FilesystemType::Btrfs,
-            "/",
-        ));
-
-        // Home partition
-        partitions.push(PartitionEntry::new(
-            "/dev/sda4",
-            self.home_size_mb,
-            FilesystemType::Btrfs,
-            "/home",
-        ));
-
-        partitions
+            PartitionEntry::new("/dev/sda2", self.swap_size_mb, FilesystemType::Swap, "swap"),
+            PartitionEntry::new("/dev/sda3", self.root_size_mb, FilesystemType::Btrfs, "/"),
+            PartitionEntry::new(
+                "/dev/sda4",
+                self.home_size_mb,
+                FilesystemType::Btrfs,
+                "/home",
+            ),
+        ]
     }
 
     pub fn validate_layout(&self, partitions: &[PartitionEntry]) -> Result<(), &'static str> {
