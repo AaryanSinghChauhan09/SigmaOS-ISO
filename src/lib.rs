@@ -9,10 +9,10 @@
 
 extern crate alloc;
 
-#[path = "../iso/mod.rs"]
-pub mod iso;
 #[path = "../installer/mod.rs"]
 pub mod installer;
+#[path = "../iso/mod.rs"]
+pub mod iso;
 
 // Re-export key interfaces
 pub use iso::builder::DistroIsoBuilder;
