@@ -142,3 +142,14 @@ Detailed Wiki documentation is available in the standalone Wiki repository:
 
 For the complete SigmaOS Wiki catalog, see:
 - [SigmaOS Wiki Staging](https://github.com/AaryanSinghChauhan09/sigmaos-wiki-staging)
+
+## See Also
+
+Related SigmaOS **Core System** repositories:
+
+- [SigmaOS-sigma-kernel](../SigmaOS-sigma-kernel/README.md) — SigmaOS microkernel / x86_64 kernel
+- [SigmaOS-sigma-sh](../SigmaOS-sigma-sh/README.md) — SigmaOS interactive userspace shell
+- [SigmaOS-sigma-sys](../SigmaOS-sigma-sys/README.md) — SigmaOS syscall ABI & userspace interface
+- [SigmaOS-initramfs](../SigmaOS-initramfs/README.md) — SigmaOS initramfs builder & hook planner
+- [SigmaOS-sigma-bootloader](../SigmaOS-sigma-bootloader/README.md) — SigmaOS bootloader
+- [SigmaOS-installer](../SigmaOS-installer/README.md) — SigmaOS system installer
