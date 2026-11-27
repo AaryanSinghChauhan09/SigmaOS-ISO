@@ -4,7 +4,7 @@ The bootable SigmaOS system: an Arch-based live ISO with a pre-configured
 SigmaOS-inspired Hyprland desktop, plus the installer and release pipeline.
 This is the repository that produces the downloadable `.iso`.
 
-SigmaOS is **not** a custom-kernel project — it ships the stock Arch Linux
+SigmaOS is **not** a custom-kernel project — it ships the stock standard Linux
 kernel and official Arch packages (`pacman`).
 
 ## What you get
@@ -46,7 +46,7 @@ Site download page: <https://aaryansinghchauhan09.github.io/Sigma/download.html>
 
 ## Build
 
-Requires Docker **or** an Arch Linux host with `archiso`.
+Requires Docker **or** a standard Linux host with `archiso`.
 
 ```bash
 # Validate the profile only (any host):
@@ -55,7 +55,7 @@ scripts/build_archiso.sh --validate-only
 # Build via Docker (works on Ubuntu/Debian hosts):
 scripts/build_archiso.sh --docker
 
-# Build natively on Arch Linux:
+# Build natively on standard Linux:
 sudo scripts/build_archiso.sh --native
 ```
 
