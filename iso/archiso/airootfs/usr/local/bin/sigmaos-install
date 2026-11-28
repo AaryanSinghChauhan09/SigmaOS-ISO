@@ -173,6 +173,22 @@ if command -v reflector >/dev/null 2>&1; then
         echo "[6/9] reflector failed — keeping shipped mirrorlist"
     fi
 fi
+# Ensure the target has a usable pacman keyring before pacstrap verifies
+# package signatures. pacstrap only copies /etc/pacman.d/gnupg when it
+# exists on the live system; if it is missing, pacman aborts the whole
+# transaction with "keyring is not writable" after downloading every
+# package. Seed from the live keyring when populated, else import the
+# archlinux-keyring package's shipped keys (offline, no keyserver).
+GNUPG_T="$MNT/etc/pacman.d/gnupg"
+mkdir -p "$GNUPG_T"
+if [ -s /etc/pacman.d/gnupg/pubring.kbx ] || [ -s /etc/pacman.d/gnupg/pubring.gpg ]; then
+    cp -a /etc/pacman.d/gnupg/. "$GNUPG_T/"
+elif command -v pacman-key >/dev/null 2>&1; then
+    pacman-key --gpgdir "$GNUPG_T" --init >/dev/null 2>&1 || true
+    pacman-key --gpgdir "$GNUPG_T" --populate archlinux >/dev/null 2>&1 || true
+fi
+chmod 700 "$GNUPG_T" 2>/dev/null || true
+
 # pacman has no per-package mirror failover: one stalled mirror aborts the
 # whole transaction. Retry a few times, refreshing the package lists so a
 # different mirror may be picked on each attempt.

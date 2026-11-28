@@ -79,4 +79,23 @@ if [ -f /usr/bin/hyprland-welcome ]; then
   rm -f /usr/bin/hyprland-welcome
   echo "customize: removed hyprland-welcome (crashes in libhyprtoolkit)"
 fi
+
+# Populate the pacman keyring. mkarchiso's airootfs does not guarantee a
+# usable /etc/pacman.d/gnupg, and without it live-session `pacman -S` fails
+# signature checks and sigmaos-install's pacstrap aborts with "keyring is
+# not writable" / "required key missing from keyring" after downloading
+# every package. --populate archlinux imports the keyring shipped inside
+# the archlinux-keyring package (no keyserver needed); fall back to a
+# keyserver populate if the local import comes up empty.
+if [ ! -s /etc/pacman.d/gnupg/pubring.kbx ] && [ ! -s /etc/pacman.d/gnupg/pubring.gpg ]; then
+  pacman-key --init >/dev/null 2>&1 || true
+  pacman-key --populate archlinux >/dev/null 2>&1 || true
+fi
+if [ ! -s /etc/pacman.d/gnupg/pubring.kbx ] && [ ! -s /etc/pacman.d/gnupg/pubring.gpg ]; then
+  pacman-key --populate >/dev/null 2>&1 || true
+fi
+pacman-key --list-keys >/dev/null 2>&1 \
+  && echo "customize: pacman keyring populated ($(pacman-key --list-keys 2>/dev/null | grep -c '^pub'))" \
+  || echo "customize: WARNING pacman keyring still empty" >&2
+
 ls -l /boot/
