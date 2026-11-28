@@ -253,6 +253,14 @@ arch-chroot "$MNT" bash -c '
     set -e
     # Ensure the kernel + initramfs exist, then build all presets.
     [[ -e /boot/vmlinuz-linux ]] || cp /usr/lib/modules/*/vmlinuz /boot/vmlinuz-linux
+    # Newer kernel packaging has shipped without /etc/mkinitcpio.d/*.preset;
+    # mkinitcpio -P then aborts with "No presets found". Emit a preset
+    # ourselves when none exists — /etc/mkinitcpio.conf still supplies HOOKS.
+    if ! compgen -G "/etc/mkinitcpio.d/*.preset" >/dev/null; then
+        echo "[7/9] no mkinitcpio presets found — writing linux.preset"
+        ls -la /etc/mkinitcpio.d/ || true
+        printf "PRESETS=(\"default\" \"fallback\")\n" > /etc/mkinitcpio.d/linux.preset
+    fi
     mkinitcpio -P
     # Install GRUB for UEFI into the ESP mounted at /boot. Some VMs and
     # containers lack efivarfs, so fall back to --no-nvram (files land on
