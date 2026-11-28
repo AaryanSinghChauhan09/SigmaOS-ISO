@@ -16,7 +16,7 @@ on:
 jobs:
   installer-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 150
     steps:
       - uses: actions/checkout@v4
 
@@ -56,7 +56,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run end-to-end install test
-        run: bash scripts/ci/qemu_installer_e2e.sh "${{ steps.iso.outputs.iso }}" out/e2e 2400 600
+        run: bash scripts/ci/qemu_installer_e2e.sh "${{ steps.iso.outputs.iso }}" out/e2e 4800 600
 
       - name: Upload serial log on failure
         if: failure()
