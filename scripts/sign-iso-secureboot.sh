@@ -11,9 +11,12 @@
 #
 #   KEY_DIR  dir with db.{key,crt}; auto-generated (throwaway) if absent.
 #
-# REQUIREMENTS: xorriso, mtools (mcopy/mdir), sbsign, openssl.
+# REQUIREMENTS: mtools (mcopy/mdir), sbsign, openssl, sfdisk (util-linux),
+# python3. xorriso is optional — only needed if efiboot.img turns out to be
+# a plain ISO9660 file rather than an appended partition.
 # Run on Arch or in the build container. The result still needs the
-# signing cert enrolled once per machine (MOK/db) — see sign-secureboot.sh.
+# signing cert enrolled once per machine (MOK/db) — CI publishes it as
+# SigmaOS-SecureBoot-CA.crt alongside the signed ISO.
 #
 # NOTE: This signs the loader + kernel EFI stub. Full Secure Boot also
 # needs the kernel's EFI stub signature to be honoured by the boot chain;
@@ -25,7 +28,7 @@ ISO_OUT="${2:-${ISO_IN%.iso}-secureboot.iso}"
 KEYDIR="${3:-./secureboot-keys}"
 WORK="$(mktemp -d)"; trap 'rm -rf "$WORK"' EXIT
 
-for t in xorriso mcopy mdir sbsign openssl; do
+for t in mcopy mdir sbsign openssl sfdisk python3; do
     command -v "$t" >/dev/null || { echo "error: need $t" >&2; exit 1; }
 done
 [[ -f "$ISO_IN" ]] || { echo "error: $ISO_IN not found" >&2; exit 1; }
@@ -53,25 +56,37 @@ is_fat_esp() { # $1 = candidate image; true if it looks like the ESP
     mdir -i "$1" ::/EFI >/dev/null 2>&1
 }
 
-xorriso -osirrox on -indev "$ISO_IN" -extract /efiboot.img "$WORK/efiboot.img" 2>/dev/null || true
+if command -v xorriso >/dev/null; then
+    xorriso -osirrox on -indev "$ISO_IN" -extract /efiboot.img "$WORK/efiboot.img" 2>/dev/null || true
+fi
 if ! is_fat_esp "$WORK/efiboot.img"; then
     rm -f "$WORK/efiboot.img"
-    # Fallback: scan appended partitions for a FAT ESP and carve it out.
-    echo "efiboot.img not a plain file — scanning appended partitions ..."
-    local_start=0
-    # fdisk -l reports appended partitions with start sector + size.
-    while read -r _ part_start part_sectors _; do
+    # Fallback: the EFI image is not a plain ISO9660 file. archiso appends it
+    # as a partition on the hybrid ISO (isohybrid GPT) and/or embeds it as
+    # the El Torito boot image. Scan every partition recorded by sfdisk and
+    # carve out whichever one is a FAT ESP — do not filter on partition type,
+    # since archiso does not always tag it with the standard ESP GUID.
+    echo "efiboot.img not a plain file — scanning partitions ..."
+    while read -r part_start part_sectors; do
         [[ "$part_start" =~ ^[0-9]+$ && "$part_sectors" =~ ^[0-9]+$ ]] || continue
-        [[ "$part_start" -gt 0 ]] || continue
+        [[ "$part_start" -gt 0 && "$part_sectors" -gt 0 ]] || continue
         dd if="$ISO_IN" of="$WORK/esp_candidate.img" bs=512 \
             skip="$part_start" count="$part_sectors" status=none 2>/dev/null || continue
         if is_fat_esp "$WORK/esp_candidate.img"; then
             mv "$WORK/esp_candidate.img" "$WORK/efiboot.img"
             ESP_OFFSET="$part_start"; ESP_SECTORS="$part_sectors"
-            echo "  carved ESP from appended partition @sector $part_start"
+            echo "  carved ESP from partition @sector $part_start ($part_sectors sectors)"
             break
         fi
-    done < <(fdisk -l "$ISO_IN" 2>/dev/null | awk '/\.img|^\/|^Disk/{next} $2 ~ /^[0-9]+$/ && $4 ~ /^[0-9]+$/ {print $2, $4}')
+    done < <(sfdisk -J "$ISO_IN" 2>/dev/null | python3 -c "
+import json,sys
+try:
+    d=json.load(sys.stdin)
+except Exception:
+    sys.exit(0)
+for p in d.get('partitiontable',{}).get('partitions',[]):
+    print(p['start'], p['size'])
+" || true)
 fi
 [[ -f "$WORK/efiboot.img" ]] && is_fat_esp "$WORK/efiboot.img" \
     || { echo "error: could not locate a valid EFI system partition in ISO" >&2; exit 1; }
@@ -91,15 +106,34 @@ fi
 
 # --- sign ------------------------------------------------------------------
 echo "Signing ${#EFIS[@]} EFI binaries ..."
+SIGN_FAIL=0
 for efi in "${EFIS[@]}"; do
     rel="${efi#$WORK/efisrc/}"
-    sbsign --key "$KEY" --cert "$CRT" "$efi" >/dev/null 2>&1 \
-        && echo "  signed: $rel" || echo "  FAILED: $rel" >&2
+    # sbsign does NOT modify its input in place — without --output it writes
+    # "<file>.signed" and leaves the original untouched, which silently
+    # produced unsigned "secureboot" ISOs. Sign to a temp name, then replace.
+    # A partially signed image is worse than none: Secure Boot rejects the
+    # whole chain if any binary in it is unsigned. Fail loudly instead.
+    if sbsign --key "$KEY" --cert "$CRT" --output "$efi.signed" "$efi" >/dev/null 2>&1 \
+        && [[ -s "$efi.signed" ]]; then
+        mv "$efi.signed" "$efi"
+        echo "  signed: $rel"
+    else
+        rm -f "$efi.signed"
+        echo "  FAILED: $rel" >&2
+        SIGN_FAIL=$((SIGN_FAIL + 1))
+    fi
 done
+if [[ $SIGN_FAIL -gt 0 ]]; then
+    echo "error: $SIGN_FAIL EFI binary(ies) failed to sign — aborting" >&2
+    exit 1
+fi
 
 # --- copy signed files back into efiboot.img --------------------------------
+# NOTE: `mcopy -s . ::` fails with "Cannot create entry named . or .." and
+# copies nothing — enumerate the top-level entries instead.
 echo "Writing signatures back into efiboot.img ..."
-( cd "$WORK/efisrc" && mcopy -s -o -i "$WORK/efiboot.img" . :: ) 2>/dev/null || true
+( cd "$WORK/efisrc" && mcopy -s -o -i "$WORK/efiboot.img" * :: )
 
 # --- rebuild ISO with the signed efiboot.img --------------------------------
 echo "Rebuilding ISO -> $ISO_OUT ..."
@@ -113,6 +147,10 @@ if [[ -n "$ESP_OFFSET" ]]; then
     echo "  wrote signed ESP back @sector $ESP_OFFSET"
 else
     # efiboot.img was a regular ISO file: replace it in-place.
+    command -v xorriso >/dev/null || {
+        echo "error: efiboot.img is a plain ISO file but xorriso is not installed" >&2
+        exit 1
+    }
     xorriso -indev "$ISO_OUT" -outdev "$ISO_OUT" \
         -boot_image any replay \
         -map "$WORK/efiboot.img" /efiboot.img \

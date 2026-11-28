@@ -161,6 +161,18 @@ EOF
 fi
 
 echo "[6/9] Installing system with pacstrap (desktop-parity package set)..."
+# Refresh the mirrorlist before pacstrap: pacman has no per-package mirror
+# failover, so one slow/stalled mirror drags the whole ~800-package
+# transaction down to KiB/s. reflector measures real download rates and
+# keeps only the fastest mirrors; on failure the shipped list stays.
+if command -v reflector >/dev/null 2>&1; then
+    if reflector --latest 20 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1 \
+        && [[ -s /etc/pacman.d/mirrorlist ]]; then
+        echo "[6/9] mirrorlist refreshed via reflector ($(grep -c '^Server' /etc/pacman.d/mirrorlist) mirrors)"
+    else
+        echo "[6/9] reflector failed — keeping shipped mirrorlist"
+    fi
+fi
 # pacman has no per-package mirror failover: one stalled mirror aborts the
 # whole transaction. Retry a few times, refreshing the package lists so a
 # different mirror may be picked on each attempt.

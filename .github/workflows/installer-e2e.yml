@@ -62,5 +62,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: installer-e2e-serial
-          path: out/e2e/
+          # Logs only — out/e2e also holds the 24 GiB install disk image and
+          # the extracted kernel/initramfs, which pushed this artifact past
+          # 1.5 GB and made it impractical to download for debugging.
+          path: |
+            out/e2e/*.log
+            out/e2e/qemu.err
           if-no-files-found: ignore

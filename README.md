@@ -36,6 +36,11 @@ cat sigmaos-desktop-*.iso.part* > sigmaos-desktop.iso
 sha256sum -c sigmaos-desktop-*.iso.sha256   # or .parts.sha256 for the parts
 ```
 
+When present, releases also include a `*-secureboot.iso` variant (same
+desktop, EFI binaries signed) plus `SigmaOS-SecureBoot-CA.crt` — enrol that
+certificate once per machine (MOK or firmware db) before booting the signed
+variant with Secure Boot enabled. The standard ISO remains unsigned.
+
 Site download page: <https://aaryansinghchauhan09.github.io/Sigma/download.html>
 
 ## Requirements
@@ -101,7 +106,7 @@ qemu-system-x86_64 -m 4G -enable-kvm -cdrom out/*.iso
 | BIOS boot (SeaBIOS, syslinux) | Verified in QEMU |
 | UEFI boot (OVMF/EDK2, systemd-boot) | Verified in QEMU (2026.11.24+) |
 | `dd`-written USB | Supported (hybrid ISO) |
-| Secure Boot | Not supported — image is unsigned |
+| Secure Boot | Signed `*-secureboot.iso` variant in releases; enrol `SigmaOS-SecureBoot-CA.crt` once. Standard ISO is unsigned. Enforcement on real hardware untested |
 | NVIDIA GPUs | Experimental — untested |
 | aarch64 / ARM | Not supported (x86_64 only) |
 
@@ -129,8 +134,10 @@ qemu-system-x86_64 -m 4G -enable-kvm -cdrom out/*.iso
 
 - **Verified:** BIOS + UEFI boot in QEMU, live Hyprland session, MVP tools
   present in the shipped image, installer dry-run safety in QEMU.
-- **Experimental:** installer end-to-end install in VM, Secure Boot signing
-  (needs enrolled keys), snapshot/rollback features, NVIDIA hardware.
+- **Experimental:** installer end-to-end install in VM, Secure Boot
+  enforcement on enrolled hardware (the signed variant is built and
+  signature-verified in CI, but no CI job boots it with SB policy
+  enforced), snapshot/rollback features, NVIDIA hardware.
 
 Report issues: <https://github.com/AaryanSinghChauhan09/SigmaOS-ISO/issues>
 
