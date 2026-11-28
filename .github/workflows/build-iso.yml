@@ -22,6 +22,12 @@ on:
 permissions:
   contents: write
 
+# ISO builds are ~1-2h and produce multi-GB artifacts; never run two for
+# the same ref concurrently — queue instead.
+concurrency:
+  group: build-iso-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-iso:
     runs-on: ubuntu-latest
@@ -168,11 +174,27 @@ jobs:
         # Checksums for the whole ISO and for the parts.
         (cd release_parts && sha256sum *.part > "${BASE}.parts.sha256")
         (cd out && sha256sum "$BASE" > "../release_parts/${BASE}.sha256")
-        # Each build publishes a new dated release (releases are immutable,
-        # so never reuse a tag). Users grab the newest by date.
-        TAG="sigmaos-desktop-${STAMP}-run${{ github.run_number }}"
-        gh release create "$TAG" \
-          --title "SigmaOS Desktop ${STAMP}" \
-          --notes "SigmaOS live ISO (BIOS+UEFI), built by CI run ${{ github.run_number }}. Assets include the standard ISO plus a Secure-Boot-signed variant (*-secureboot.iso) and SigmaOS-SecureBoot-CA.crt for one-time key enrolment. See the Wiki 'ISO Build Guide'." \
-          release_parts/*
-        echo "Published release: https://github.com/${{ github.repository }}/releases/tag/${TAG}" >> $GITHUB_STEP_SUMMARY
+        # Rolling release model: a single stable tag is updated in place.
+        # Stale assets from previous builds are deleted first so the
+        # release always contains exactly the artifacts of the latest
+        # successful build. Dated tags/releases are not created.
+        TAG="sigmaos-rolling"
+        STAMP=$(date +%Y.%m.%d)
+        NOTES="SigmaOS live ISO (BIOS+UEFI), rolling build from CI run ${{ github.run_number }} (${STAMP}). Assets include the standard ISO plus a Secure-Boot-signed variant (*-secureboot.iso) and SigmaOS-SecureBoot-CA.crt for one-time key enrolment. Reassemble parts with scripts/reassemble-iso.sh. See the Wiki 'ISO Build Guide'."
+        if gh release view "$TAG" >/dev/null 2>&1; then
+          # Remove assets from the previous build (filenames are dated,
+          # so --clobber alone would leave stale parts behind).
+          gh release view "$TAG" --json assets --jq '.assets[].id' | \
+            while read -r AID; do
+              gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$AID" >/dev/null
+            done
+          gh release upload "$TAG" --clobber release_parts/*
+          gh release edit "$TAG" --title "SigmaOS Desktop (rolling)" --notes "$NOTES"
+        else
+          gh release create "$TAG" \
+            --title "SigmaOS Desktop (rolling)" \
+            --notes "$NOTES" \
+            --latest \
+            release_parts/*
+        fi
+        echo "Published rolling release: https://github.com/${{ github.repository }}/releases/tag/${TAG}" >> $GITHUB_STEP_SUMMARY
