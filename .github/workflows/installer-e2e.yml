@@ -35,7 +35,8 @@ jobs:
             --dir artifacts --clobber
           python3 - <<'PY'
           import glob, hashlib, os, re
-          parts = sorted(glob.glob('artifacts/*.iso.*.part'))
+          parts = sorted(p for p in glob.glob('artifacts/*.iso.*.part')
+                         if 'secureboot' not in p)
           if not parts:
               raise SystemExit('no .iso.*.part assets found')
           out = 'artifacts/sigmaos-e2e.iso'
