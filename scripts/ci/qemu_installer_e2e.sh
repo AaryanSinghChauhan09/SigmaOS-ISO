@@ -276,7 +276,9 @@ if [[ ! -s "$WORK/grub.cfg" ]]; then
     mdir -i -b -s -i "$DISK@@$ESP_OFF" ::/grub >&2 || mdir -i "$DISK@@$ESP_OFF" -s ::/grub >&2 || true
     exit 1
 fi
-sed -E -i 's/^(linux[[:space:]].*)$/\1 console=ttyS0/' "$WORK/grub.cfg"
+# grub.cfg menuentry bodies are tab-indented — anchor on the first word
+# being 'linux' after optional whitespace, not on column 0.
+sed -E -i 's/^([[:space:]]*linux[[:space:]][^#]*)$/\1 console=ttyS0/' "$WORK/grub.cfg"
 grep -q "console=ttyS0" "$WORK/grub.cfg" || {
     echo "[e2e] FAIL — could not patch grub.cfg" >&2; exit 1; }
 mcopy -o -i "$DISK@@$ESP_OFF" "$WORK/grub.cfg" ::grub/grub.cfg
