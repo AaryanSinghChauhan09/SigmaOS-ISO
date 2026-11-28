@@ -270,6 +270,14 @@ arch-chroot "$MNT" bash -c '
     grub-install --target=x86_64-efi --efi-directory=/boot \
         --bootloader-id=SigmaOS --recheck --no-nvram
     grub-mkconfig -o /boot/grub/grub.cfg
+    # Deploy the removable-media fallback loader \EFI\BOOT\BOOTX64.EFI.
+    # efibootmgr cannot register an NVRAM entry when efivarfs is absent
+    # (live env, some VMs/boards), and firmware without an entry only
+    # finds the fallback path — without it the disk is unbootable.
+    mkdir -p /boot/EFI/BOOT
+    for f in /boot/EFI/*/BOOTX64.EFI; do
+        [[ -f "$f" ]] && cp -f "$f" /boot/EFI/BOOT/BOOTX64.EFI && break
+    done
     systemctl enable NetworkManager bluetoothd fstrim.timer 2>/dev/null || true
 '
 

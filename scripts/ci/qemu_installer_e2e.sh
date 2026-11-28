@@ -284,6 +284,21 @@ grep -q "console=ttyS0" "$WORK/grub.cfg" || {
 mcopy -o -i "$DISK@@$ESP_OFF" "$WORK/grub.cfg" ::grub/grub.cfg
 sync
 
+# The installer cannot register an NVRAM boot entry from the live env
+# (no efivarfs), so OVMF finds no Boot#### for the disk. Deploy the
+# removable-media fallback loader \EFI\BOOT\BOOTX64.EFI — the same path
+# real firmware falls back to — copied from the SigmaOS GRUB dir.
+if mdir -i "$DISK@@$ESP_OFF" ::EFI/SigmaOS 2>/dev/null | grep -qi 'BOOTX64\.EFI'; then
+    mmd -i "$DISK@@$ESP_OFF" ::EFI/BOOT 2>/dev/null || true
+    mcopy -o -i "$DISK@@$ESP_OFF" ::EFI/SigmaOS/BOOTX64.EFI ::EFI/BOOT/BOOTX64.EFI
+    sync
+    echo "[e2e] deployed \\EFI\\BOOT\\BOOTX64.EFI fallback loader"
+else
+    echo "[e2e] FAIL — no BOOTX64.EFI under \\EFI\\SigmaOS on ESP" >&2
+    mdir -i -s "$DISK@@$ESP_OFF" ::EFI >&2 || true
+    exit 1
+fi
+
 if [[ -z "$OVMF_CODE" || -z "$OVMF_VARS_T" ]]; then
     echo "[e2e] FAIL — OVMF firmware not found" >&2; exit 1
 fi
