@@ -183,8 +183,11 @@ jobs:
         NOTES="SigmaOS live ISO (BIOS+UEFI), rolling build from CI run ${{ github.run_number }} (${STAMP}). Assets include the standard ISO plus a Secure-Boot-signed variant (*-secureboot.iso) and SigmaOS-SecureBoot-CA.crt for one-time key enrolment. Reassemble parts with scripts/reassemble-iso.sh. See the Wiki 'ISO Build Guide'."
         if gh release view "$TAG" >/dev/null 2>&1; then
           # Remove assets from the previous build (filenames are dated,
-          # so --clobber alone would leave stale parts behind).
-          gh release view "$TAG" --json assets --jq '.assets[].id' | \
+          # so --clobber alone would leave stale parts behind). Note:
+          # 'gh release view --json assets[].id' returns GraphQL node IDs;
+          # the REST delete endpoint needs the numeric id from the API.
+          gh api "repos/${{ github.repository }}/releases/tags/$TAG" \
+            --jq '.assets[].id' | \
             while read -r AID; do
               gh api -X DELETE "repos/${{ github.repository }}/releases/assets/$AID" >/dev/null
             done
