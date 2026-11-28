@@ -287,45 +287,181 @@ if [[ -z "$OVMF_CODE" || -z "$OVMF_VARS_T" ]]; then
 fi
 cp "$OVMF_VARS_T" "$WORK/OVMF_VARS.fd"
 BOOT_LOG="$WORK/installed-boot.log"
-: > "$BOOT_LOG"
+BOOT_SOCK="$WORK/installed-serial.sock"
+CHARDNV2_LOG="$WORK/installed-chardev.log"
+: > "$BOOT_LOG"; : > "$CHARDNV2_LOG"; rm -f "$BOOT_SOCK"
 
 qemu-system-x86_64 "${QEMU_ACCEL[@]}" \
     -m 4096 -smp 4 \
     -display none \
+    -chardev "socket,id=ser1,path=$BOOT_SOCK,server=on,wait=off,logfile=$CHARDNV2_LOG" \
+    -serial chardev:ser1 \
     -drive if=pflash,format=raw,readonly=on,file="$OVMF_CODE" \
     -drive if=pflash,format=raw,file="$WORK/OVMF_VARS.fd" \
-    -serial "file:$BOOT_LOG" \
     -monitor none \
     -netdev user,id=n0 -device virtio-net-pci,netdev=n0 \
     -drive "file=$DISK,if=virtio,format=raw" \
     -no-reboot 2>"$QEMU_ERR" &
 QPID=$!
 
-FOUND=""
-ELAPSED=0
-while (( ELAPSED < BOOT_TIMEOUT )); do
-    if ! kill -0 "$QPID" 2>/dev/null; then
-        echo "[e2e] QEMU exited during installed-system boot" >&2; break
-    fi
-    for m in 'login:' 'Reached target' 'Welcome to SigmaOS' 'SigmaOS' 'sigma'; do
-        if grep -qF "$m" "$BOOT_LOG" 2>/dev/null; then FOUND="$m"; break 2; fi
-    done
-    if grep -qE 'Kernel panic|Failed to mount|Emergency shell|BdsDxe: failed' "$BOOT_LOG" 2>/dev/null; then
-        echo "[e2e] boot failure marker in log" >&2; break
-    fi
-    sleep 5; ELAPSED=$((ELAPSED + 5))
-done
+# Interactive Phase B: boot the installed disk, log in on the serial
+# console as the user created during install, and verify the system is
+# actually usable — pacman database populated, btrfs root, SigmaOS
+# tools on PATH. Booting to a login prompt alone does not prove the
+# install produced a working system.
+python3 - "$BOOT_SOCK" "$BOOT_LOG" "$BOOT_TIMEOUT" "$QPID" <<'PYEOF'
+import socket, sys, time, re, os
 
-kill "$QPID" 2>/dev/null || true
-sleep 2; kill -9 "$QPID" 2>/dev/null || true
+sock_path, log_path, timeout = sys.argv[1], sys.argv[2], int(sys.argv[3])
+qpid = int(sys.argv[4])
+deadline = time.time() + timeout
+buf = b""
+
+def logwrite(data):
+    with open(log_path, "ab") as f:
+        f.write(data)
+
+def qemu_alive():
+    try:
+        os.kill(qpid, 0)
+        return True
+    except OSError:
+        return False
+
+def connect():
+    for _ in range(600):
+        try:
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.connect(sock_path)
+            s.settimeout(0.5)
+            return s
+        except OSError:
+            if not qemu_alive():
+                raise SystemExit("qemu exited before serial socket was ready")
+            time.sleep(0.5)
+    raise SystemExit("could not connect to serial socket")
+
+s = connect()
+state = "boot"
+marks = {}
+checks = {}
+order = [
+    ("PKGCOUNT", "pacman -Q 2>/dev/null | wc -l"),
+    ("FSTYPE",   "findmnt -no FSTYPE /"),
+    ("TOOLS",    "for t in sigmaos-update sigmaos-snapshot sigmaos-doctor sigmaos-install; do command -v $t || echo MISSING-$t; done"),
+    ("FAILED",   "systemctl --failed --no-legend --plain 2>/dev/null | wc -l"),
+]
+idx = 0
+result = "timeout"
+
+while time.time() < deadline:
+    if not qemu_alive():
+        result = "qemu-died"
+        break
+    try:
+        chunk = s.recv(65536)
+        if chunk:
+            buf += chunk
+            logwrite(chunk)
+        else:
+            result = "serial-eof"
+            break
+    except socket.timeout:
+        pass
+    except OSError:
+        result = "serial-error"
+        break
+    text = buf.decode("utf-8", "replace")
+
+    if state == "boot":
+        if "login:" in text:
+            s.sendall(b"sigma\n")
+            state = "user"
+            marks["user"] = len(text)
+        elif re.search(r'Kernel panic|Failed to mount|Emergency shell|BdsDxe: failed', text):
+            result = "boot-failure-marker"
+            break
+    elif state == "user":
+        if "assword" in text[marks.get("user", 0):]:
+            s.sendall(b"test1234\n")
+            state = "shell"
+            marks["shell"] = time.time()
+    elif state == "shell":
+        prompted = re.search(r"[\$#%❯>]\s*(?:\x1b\[[0-9;]*m)*\s*$", text)
+        if prompted or time.time() - marks.get("shell", 0) > 60:
+            if idx < len(order):
+                name, cmd = order[idx]
+                s.sendall(f"{cmd}; echo __{name}__=$?\n".encode())
+                marks[f"sent_{name}"] = len(text)
+                state = f"check_{name}"
+            else:
+                result = "verified"
+                break
+    elif state.startswith("check_"):
+        name = state[len("check_"):]
+        marker = f"__{name}__="
+        pos = text.rfind(marker)
+        if pos != -1:
+            seg = text[marks.get(f"sent_{name}", 0):pos]
+            checks[name] = seg
+            idx += 1
+            state = "shell"
+    time.sleep(0.2)
+
+print(f"RESULT={result}")
+summary = [f"RESULT={result}"]
+
+def clean(seg):
+    return [re.sub(r'\x1b\[[0-9;]*m', '', l).replace('\r', '').strip()
+            for l in seg.splitlines()]
+
+def last_matching(seg, pred):
+    vals = [l for l in clean(seg) if pred(l)]
+    return vals[-1] if vals else ""
+
+pkgcount = last_matching(checks.get("PKGCOUNT", ""), lambda l: re.fullmatch(r"\d+", l))
+fstype   = last_matching(checks.get("FSTYPE", ""), lambda l: re.fullmatch(r"[a-z0-9_]+", l))
+toolslines = [l for l in clean(checks.get("TOOLS", "")) if "/" in l or "MISSING-" in l]
+failedcnt = last_matching(checks.get("FAILED", ""), lambda l: re.fullmatch(r"\d+", l))
+
+summary.append(f"VALUE_PKGCOUNT={pkgcount}")
+summary.append(f"VALUE_FSTYPE={fstype}")
+summary.append(f"VALUE_TOOLS={';'.join(toolslines)}")
+summary.append(f"VALUE_FAILED_UNITS={failedcnt}")
+for line in summary:
+    print(line)
+# Mirror the summary into the serial log so the bash-side assertions
+# can grep it (driver stdout goes to the CI log, not the logfile).
+with open(log_path, "a") as f:
+    f.write("\n".join(summary) + "\n")
+sys.exit(0 if result == "verified" else 1)
+PYEOF
+PYRC=$?
+
+sleep 2
+if kill -0 "$QPID" 2>/dev/null; then kill "$QPID" 2>/dev/null || true; fi
+sleep 2
+kill -9 "$QPID" 2>/dev/null || true
 wait "$QPID" 2>/dev/null || true
 
-if [[ -n "$FOUND" ]]; then
-    echo "[e2e] PASS — installed system booted under OVMF (marker: '$FOUND')"
-    exit 0
+if [[ $PYRC -ne 0 ]]; then
+    echo "[e2e] FAIL — installed system did not verify" >&2
+    tail -30 "$QEMU_ERR" >&2 || true
+    tail -80 "$BOOT_LOG" >&2 || true
+    exit 1
 fi
 
-echo "[e2e] FAIL — installed system did not reach userspace" >&2
-tail -30 "$QEMU_ERR" >&2 || true
-tail -60 "$BOOT_LOG" >&2 || true
-exit 1
+# Hard verification on the VALUE_* lines the driver appended to the log.
+PKGCOUNT="$(grep -oE 'VALUE_PKGCOUNT=[0-9]+' "$BOOT_LOG" | tail -1 | cut -d= -f2)"
+FSTYPE="$(grep -oE 'VALUE_FSTYPE=[a-z0-9_]+' "$BOOT_LOG" | tail -1 | cut -d= -f2)"
+TOOLS_LINE="$(grep -oE 'VALUE_TOOLS=[^ ]*' "$BOOT_LOG" | tail -1)"
+echo "[e2e] installed system: packages=${PKGCOUNT:-?} rootfs=${FSTYPE:-?} tools=${TOOLS_LINE#VALUE_TOOLS=}"
+
+[[ "${PKGCOUNT:-0}" -ge 100 ]] || { echo "[e2e] FAIL — pacman DB has only ${PKGCOUNT:-0} packages" >&2; exit 1; }
+[[ "$FSTYPE" == "btrfs" ]] || { echo "[e2e] FAIL — root filesystem is '$FSTYPE', expected btrfs" >&2; exit 1; }
+if [[ "$TOOLS_LINE" == *MISSING-* ]]; then
+    echo "[e2e] FAIL — SigmaOS tools missing on installed system ($TOOLS_LINE)" >&2; exit 1
+fi
+
+echo "[e2e] PASS — installed system booted under OVMF, logged in, and verified (btrfs root, ${PKGCOUNT} packages, SigmaOS tools present)"
+exit 0
